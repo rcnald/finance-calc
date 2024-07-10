@@ -41,87 +41,83 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
         </CollapsibleTrigger>
       </div>
 
-      <CollapsibleContent>
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="flex flex-col gap-1">
-            <Label
-              htmlFor="fee"
-              className="ml-1 text-sm font-medium leading-none"
-            >
-              Taxa
+      <CollapsibleContent className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-col gap-1">
+          <Label
+            htmlFor="fee"
+            className="ml-1 text-sm font-medium leading-none"
+          >
+            Taxa
+          </Label>
+          <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
+            <Label htmlFor="fee" className="text-muted-foreground">
+              Tipo
             </Label>
-            <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
-              <Label htmlFor="fee" className="text-muted-foreground">
-                Tipo
-              </Label>
 
-              <FeeTypeSelect id="fee" />
+            <FeeTypeSelect id="fee" />
 
-              <Label htmlFor="fee" className="text-muted-foreground">
-                <ChevronDown size={16} />
-              </Label>
+            <Label htmlFor="fee" className="text-muted-foreground">
+              <ChevronDown size={16} />
+            </Label>
 
-              <Separator orientation="vertical" className="h-5" />
+            <Separator orientation="vertical" className="h-5" />
 
-              <Label htmlFor="benchmark" className="text-muted-foreground">
-                Índice
-              </Label>
+            <Label htmlFor="benchmark" className="text-muted-foreground">
+              Índice
+            </Label>
 
-              <FeeIndexSelect id="benchmark" />
+            <FeeIndexSelect id="benchmark" />
 
-              <Label htmlFor="benchmark" className="text-muted-foreground">
-                <ChevronDown size={16} />
-              </Label>
-            </div>
+            <Label htmlFor="benchmark" className="text-muted-foreground">
+              <ChevronDown size={16} />
+            </Label>
           </div>
+        </div>
 
-          <div>
-            <Label
-              htmlFor="period"
-              className="ml-1 text-sm font-medium leading-none"
-            >
-              Prazo
+        <div>
+          <Label
+            htmlFor="period"
+            className="ml-1 text-sm font-medium leading-none"
+          >
+            Prazo
+          </Label>
+
+          <IntervalSelect id="period" className="h-[32.2px] w-fit px-2">
+            <ChevronDown size={16} className="opacity-50" />
+          </IntervalSelect>
+        </div>
+
+        <div>
+          <Label className="ml-1 text-sm font-medium leading-none">
+            Impostos
+          </Label>
+          <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
+            <Checkbox id="tax" defaultChecked />
+            <Label htmlFor="tax" className="text-muted-foreground">
+              Imposto de renda
             </Label>
-
-            <IntervalSelect id="period" className="h-[32.2px] w-fit px-2">
-              <ChevronDown size={16} className="opacity-50" />
-            </IntervalSelect>
           </div>
+        </div>
 
-          <div>
-            <Label className="ml-1 text-sm font-medium leading-none">
-              Impostos
+        <div>
+          <Label className="ml-1 text-sm font-medium leading-none">Cupom</Label>
+          <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
+            <Checkbox id="cupom" />
+            <Label htmlFor="cupom" className="text-muted-foreground">
+              Cupom de juros
             </Label>
-            <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
-              <Checkbox id="tax" defaultChecked />
-              <Label htmlFor="tax" className="text-muted-foreground">
-                Imposto de renda
-              </Label>
-            </div>
-          </div>
 
-          <div>
-            <Label className="ml-1 text-sm font-medium leading-none">
-              Cupom
+            <Separator orientation="vertical" className="h-5" />
+
+            <Label htmlFor="interval" className="text-muted-foreground">
+              Intervalo
             </Label>
-            <div className="flex h-fit w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
-              <Checkbox id="cupom" />
-              <Label htmlFor="cupom" className="text-muted-foreground">
-                Cupom de juros
-              </Label>
 
-              <Separator orientation="vertical" className="h-5" />
+            <IntervalSelect id="interval" />
 
-              <Label htmlFor="interval" className="text-muted-foreground">
-                Intervalo
-              </Label>
-
-              <IntervalSelect id="interval" />
-
-              <Label htmlFor="interval" className="text-muted-foreground">
-                <ChevronDown size={16} />
-              </Label>
-            </div>
+            <Label htmlFor="interval" className="text-muted-foreground">
+              <ChevronDown size={16} />
+            </Label>
           </div>
         </div>
       </CollapsibleContent>

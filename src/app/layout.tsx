@@ -3,6 +3,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 const fontSans = FontSans({
@@ -28,7 +29,9 @@ export default function RootLayout({
           fontSans.variable,
         )}
       >
-        {children}
+        <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   )

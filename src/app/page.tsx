@@ -1,4 +1,6 @@
+import { Box } from '@/components/ui/box'
 import { CalcConfig } from '@/components/ui/calc-config'
+import { CalcForm } from '@/components/ui/calc-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function Page() {
@@ -19,6 +21,17 @@ export default function Page() {
             </TabsList>
             <TabsContent value="period">
               <CalcConfig />
+              <CalcForm />
+
+              <Box className="flex flex-col items-center justify-center">
+                <h2 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
+                  Você precisará de
+                </h2>
+                <strong className="font-mono text-5xl text-slate-700">
+                  24
+                </strong>
+                <span className="text-muted-foreground">Meses</span>
+              </Box>
             </TabsContent>
           </Tabs>
         </section>

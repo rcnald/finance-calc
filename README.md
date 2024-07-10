@@ -8,7 +8,8 @@ Criar um sistema onde eu posso fazer cálculos financeiros de renda fixa.
 
 - Tipo de cálculo:
   - Valor futuro
-  - Valor presente 
+  - Valor presente
+  - Prazo 
   - Taxa
   - Aportes
 - Incidência de impostos:
@@ -21,7 +22,6 @@ Criar um sistema onde eu posso fazer cálculos financeiros de renda fixa.
 <summary>Inserção de Dados pelo Usuário</summary>
 
 - Taxa:
-  - Equivalência de tempo da taxa (mensal, anual, etc.)
   - Pós-fixada:
     - Selecionar índice (e.g., CDI, IPCA)
     - Taxa

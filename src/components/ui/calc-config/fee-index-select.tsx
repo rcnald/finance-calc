@@ -61,8 +61,11 @@ export function FeeIndexSelect({
   const [feeIndexValue, setFeeIndexValue] = useState<FeeIndexKeys>('cdi')
   const [isFeeIndexOpen, setIsFeeIndexOpen] = useState(false)
 
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+
   const actualValue =
     value !== undefined ? (value as FeeIndexKeys) : feeIndexValue
+  const SelectedFeeIcon = FEE_INDEX_ICONS[actualValue]
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
@@ -85,10 +88,6 @@ export function FeeIndexSelect({
       setIsFeeIndexOpen(false)
     }
   }
-
-  const isDesktop = useMediaQuery('(min-width: 768px)')
-
-  const SelectedFeeIcon = FEE_INDEX_ICONS[actualValue]
 
   return !isDesktop ? (
     <Drawer open={isFeeIndexOpen} onOpenChange={setIsFeeIndexOpen}>

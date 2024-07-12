@@ -61,8 +61,11 @@ export function FeeTypeSelect({
   const [feeTypeValue, setFeeTypeValue] = useState<FeeTypeKeys>('pre')
   const [isFeeTypeOpen, setIsFeeTypeOpen] = useState(false)
 
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+
   const actualValue =
     value !== undefined ? (value as FeeTypeKeys) : feeTypeValue
+  const SelectedFeeIcon = FEE_TYPES_ICONS[actualValue]
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
@@ -85,10 +88,6 @@ export function FeeTypeSelect({
       setIsFeeTypeOpen(false)
     }
   }
-
-  const isDesktop = useMediaQuery('(min-width: 768px)')
-
-  const SelectedFeeIcon = FEE_TYPES_ICONS[actualValue]
 
   return !isDesktop ? (
     <Drawer open={isFeeTypeOpen} onOpenChange={setIsFeeTypeOpen}>

@@ -60,6 +60,8 @@ export function IntervalSelect({
   const [intervalValue, setIntervalValue] = useState<IntervalKeys>('month')
   const [isIntervalOpen, setIsIntervalOpen] = useState(false)
 
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+
   const actualValue =
     value !== undefined ? (value as IntervalKeys) : intervalValue
 
@@ -84,8 +86,6 @@ export function IntervalSelect({
       setIsIntervalOpen(false)
     }
   }
-
-  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   return !isDesktop ? (
     <Drawer open={isIntervalOpen} onOpenChange={setIsIntervalOpen}>

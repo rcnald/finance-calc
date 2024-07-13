@@ -45,7 +45,9 @@ const FEE_INDEX_ICONS = {
   selic: BadgeDollarSign,
 } as const
 
-type FeeIndexKeys = keyof typeof FEE_INDEX
+export type FeeIndex = keyof typeof FEE_INDEX
+
+export const FeeIndexSchema = Object.keys(FEE_INDEX) as FeeIndex[]
 
 export interface FeeIndexSelectProps {
   value?: string
@@ -58,20 +60,21 @@ export function FeeIndexSelect({
   onValueChange,
   id,
 }: FeeIndexSelectProps) {
-  const [feeIndexValue, setFeeIndexValue] = useState<FeeIndexKeys>('cdi')
+  const [feeIndexValue, setFeeIndexValue] = useState<FeeIndex>('cdi')
   const [isFeeIndexOpen, setIsFeeIndexOpen] = useState(false)
 
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const actualValue =
-    value !== undefined ? (value as FeeIndexKeys) : feeIndexValue
+  const actualValue = Object.keys(FEE_INDEX).includes(value ?? '')
+    ? (value as FeeIndex)
+    : feeIndexValue
   const SelectedFeeIcon = FEE_INDEX_ICONS[actualValue]
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
-      onValueChange(value as FeeIndexKeys)
+      onValueChange(value as FeeIndex)
     } else {
-      setFeeIndexValue(value as FeeIndexKeys)
+      setFeeIndexValue(value as FeeIndex)
     }
   }
 
@@ -110,7 +113,7 @@ export function FeeIndexSelect({
           onValueChange={handleValueChange}
         >
           {Object.entries(FEE_INDEX).map(([key, value]) => {
-            const Icon = FEE_INDEX_ICONS[key as FeeIndexKeys]
+            const Icon = FEE_INDEX_ICONS[key as FeeIndex]
 
             return (
               <FeeTypeSelectItem
@@ -146,7 +149,7 @@ export function FeeIndexSelect({
       </SelectTrigger>
       <SelectContent>
         {Object.entries(FEE_INDEX).map(([key, value]) => {
-          const Icon = FEE_INDEX_ICONS[key as FeeIndexKeys]
+          const Icon = FEE_INDEX_ICONS[key as FeeIndex]
 
           return (
             <SelectItem key={key} value={key}>

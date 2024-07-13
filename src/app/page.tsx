@@ -1,9 +1,32 @@
+'use client'
+
 import { Box } from '@/components/ui/box'
 import { CalcConfig } from '@/components/ui/calc-config'
 import { CalcForm } from '@/components/ui/calc-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useQueryParams } from '@/hooks/useQueryParams'
+
+const CALC_MODE = {
+  period: 'Prazo',
+  fee: 'Taxa',
+  'present-value': 'Valor Presente',
+  'future-value': 'Valor Futuro',
+  contributions: 'Aportes',
+} as const
+
+export type CalcMode = keyof typeof CALC_MODE
+
+export const CalcModeSchema = Object.keys(CALC_MODE) as CalcMode[]
 
 export default function Page() {
+  const [calcMode, setCalcMode] = useQueryParams<CalcMode>(
+    'calc-mode',
+    'period',
+    CalcModeSchema,
+  )
+
+  const currentTab = calcMode
+
   return (
     <>
       <main>
@@ -11,16 +34,23 @@ export default function Page() {
           <h1 className="text-2xl font-bold text-card-foreground">
             O que vamos calcular hoje?
           </h1>
-          <Tabs defaultValue="period" className="w-[400px]">
+          <Tabs
+            defaultValue={currentTab}
+            value={currentTab}
+            onValueChange={(value) => setCalcMode(value as CalcMode)}
+            className="w-[400px]"
+          >
             <TabsList>
-              <TabsTrigger value="period">Prazo</TabsTrigger>
-              <TabsTrigger value="taxe">Taxa</TabsTrigger>
-              <TabsTrigger value="present-value">Valor Presente</TabsTrigger>
-              <TabsTrigger value="future-value">Valor Futuro</TabsTrigger>
-              <TabsTrigger value="contributions">Aportes</TabsTrigger>
+              {Object.entries(CALC_MODE).map(([key, value]) => {
+                return (
+                  <TabsTrigger key={key} value={key as CalcMode}>
+                    {value}
+                  </TabsTrigger>
+                )
+              })}
             </TabsList>
+            <CalcConfig />
             <TabsContent value="period">
-              <CalcConfig />
               <CalcForm />
 
               <Box className="flex flex-col items-center justify-center">

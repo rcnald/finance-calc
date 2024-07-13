@@ -29,9 +29,7 @@ export default function RootLayout({
           fontSans.variable,
         )}
       >
-        <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-          {children}
-        </TooltipProvider>
+        <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
   )

@@ -4,9 +4,16 @@ import { Info } from 'lucide-react'
 import { ChangeEventHandler } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
+import { useQueryParams } from '@/hooks/useQueryParams'
 import { filterDigits, formatToCurrency } from '@/lib/utils'
 
-import { Button } from './button'
+import { Button } from '../button'
+import {
+  INTERVAL,
+  Interval,
+  IntervalSchema,
+  PLURAL_INTERVAL,
+} from '../calc-config/interval-select'
 import {
   Drawer,
   DrawerClose,
@@ -16,14 +23,20 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from './drawer'
-import { Input, InputUnit } from './input'
-import { Label } from './label'
-import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
+} from '../drawer'
+import { Input, InputUnit } from '../input'
+import { Label } from '../label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip'
 
 export interface CalcFormProps {}
 
 export function CalcForm({ ...props }: CalcFormProps) {
+  const [periodInterval] = useQueryParams<Interval>(
+    'period-interval',
+    'month',
+    IntervalSchema,
+  )
+
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
   const handleCurrencyInputChange: ChangeEventHandler<HTMLInputElement> = (
@@ -35,9 +48,14 @@ export function CalcForm({ ...props }: CalcFormProps) {
   ) => (value.target.value = filterDigits(value.target.value))
 
   return (
-    <div {...props}>
-      <div>
-        <Label htmlFor="period">Daqui quanto tempo você precisa?</Label>
+    <div className="flex flex-col gap-4" {...props}>
+      <div className="flex flex-col gap-2">
+        <Label
+          htmlFor="period"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Daqui quanto tempo você precisa?
+        </Label>
         <Input
           id="period"
           placeholder="0"
@@ -45,13 +63,18 @@ export function CalcForm({ ...props }: CalcFormProps) {
           onChange={handleDigitsInputChange}
           className="font-semibold"
         >
-          <InputUnit>Meses</InputUnit>
+          <InputUnit>{PLURAL_INTERVAL[periodInterval]}</InputUnit>
         </Input>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="present-value">Quanto você tem hoje?</Label>
+          <Label
+            htmlFor="present-value"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Quanto você tem hoje?
+          </Label>
         </div>
         <Input
           id="present-value"
@@ -64,9 +87,14 @@ export function CalcForm({ ...props }: CalcFormProps) {
         </Input>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="fee">Qual a taxa do seu investimento?</Label>
+          <Label
+            htmlFor="fee"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Qual a taxa do seu investimento?
+          </Label>
           {isDesktop ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -122,9 +150,12 @@ export function CalcForm({ ...props }: CalcFormProps) {
         </Input>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="contribution">
+          <Label
+            htmlFor="contribution"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Quanto você vai investir regularmente?
           </Label>
         </div>
@@ -136,7 +167,9 @@ export function CalcForm({ ...props }: CalcFormProps) {
           className="pl-12 font-semibold"
         >
           <InputUnit corner="left">R$</InputUnit>
-          <InputUnit corner="right">Por mês</InputUnit>
+          <InputUnit corner="right">
+            Por {INTERVAL[periodInterval].toLocaleLowerCase()}
+          </InputUnit>
         </Input>
       </div>
 

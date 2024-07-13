@@ -45,7 +45,9 @@ const FEE_TYPES_ICONS = {
   indexed: ArrowUpNarrowWide,
 } as const
 
-type FeeTypeKeys = keyof typeof FEE_TYPES
+export type FeeType = keyof typeof FEE_TYPES
+
+export const FeeTypeSchema = Object.keys(FEE_TYPES) as FeeType[]
 
 export interface FeeTypeSelectProps {
   value?: string
@@ -58,20 +60,21 @@ export function FeeTypeSelect({
   onValueChange,
   id,
 }: FeeTypeSelectProps) {
-  const [feeTypeValue, setFeeTypeValue] = useState<FeeTypeKeys>('pre')
+  const [feeTypeValue, setFeeTypeValue] = useState<FeeType>('pre')
   const [isFeeTypeOpen, setIsFeeTypeOpen] = useState(false)
 
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const actualValue =
-    value !== undefined ? (value as FeeTypeKeys) : feeTypeValue
+  const actualValue = Object.keys(FEE_TYPES).includes(value ?? '')
+    ? (value as FeeType)
+    : feeTypeValue
   const SelectedFeeIcon = FEE_TYPES_ICONS[actualValue]
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
-      onValueChange(value as FeeTypeKeys)
+      onValueChange(value as FeeType)
     } else {
-      setFeeTypeValue(value as FeeTypeKeys)
+      setFeeTypeValue(value as FeeType)
     }
   }
 
@@ -110,7 +113,7 @@ export function FeeTypeSelect({
           onValueChange={handleValueChange}
         >
           {Object.entries(FEE_TYPES).map(([key, value]) => {
-            const Icon = FEE_TYPES_ICONS[key as FeeTypeKeys]
+            const Icon = FEE_TYPES_ICONS[key as FeeType]
 
             return (
               <FeeTypeSelectItem
@@ -146,7 +149,7 @@ export function FeeTypeSelect({
       </SelectTrigger>
       <SelectContent>
         {Object.entries(FEE_TYPES).map(([key, value]) => {
-          const Icon = FEE_TYPES_ICONS[key as FeeTypeKeys]
+          const Icon = FEE_TYPES_ICONS[key as FeeType]
 
           return (
             <SelectItem key={key} value={key}>

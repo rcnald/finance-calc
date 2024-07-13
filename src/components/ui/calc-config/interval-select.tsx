@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from '../select'
 
-const INTERVAL = {
+export const INTERVAL = {
   month: 'Mês',
   year: 'Ano',
   'half-year': 'Semestre',
@@ -40,7 +40,17 @@ const INTERVAL = {
   quarter: 'Trimestre',
 } as const
 
-type IntervalKeys = keyof typeof INTERVAL
+export const PLURAL_INTERVAL = {
+  month: 'Meses',
+  year: 'Anos',
+  'half-year': 'Semestres',
+  'two-months': 'Bimestres',
+  quarter: 'Trimestres',
+} as const
+
+export type Interval = keyof typeof INTERVAL
+
+export const IntervalSchema = Object.keys(INTERVAL) as Interval[]
 
 export interface IntervalSelectProps {
   value?: string
@@ -57,19 +67,20 @@ export function IntervalSelect({
   children,
   className,
 }: IntervalSelectProps) {
-  const [intervalValue, setIntervalValue] = useState<IntervalKeys>('month')
+  const [intervalValue, setIntervalValue] = useState<Interval>('month')
   const [isIntervalOpen, setIsIntervalOpen] = useState(false)
 
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const actualValue =
-    value !== undefined ? (value as IntervalKeys) : intervalValue
+  const actualValue = Object.keys(INTERVAL).includes(value ?? '')
+    ? (value as Interval)
+    : intervalValue
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
-      onValueChange(value as IntervalKeys)
+      onValueChange(value as Interval)
     } else {
-      setIntervalValue(value as IntervalKeys)
+      setIntervalValue(value as Interval)
     }
   }
 

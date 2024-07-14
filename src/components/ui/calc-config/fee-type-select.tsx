@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '../select'
 
-const FEE_TYPES = {
+export const FEE_TYPES = {
   pre: 'Pré-fixado',
   pos: 'Pós-fixado',
   indexed: 'Indexado',
@@ -47,7 +47,7 @@ const FEE_TYPES_ICONS = {
 
 export type FeeType = keyof typeof FEE_TYPES
 
-export const FeeTypeSchema = Object.keys(FEE_TYPES) as FeeType[]
+export const FeeTypeSchema = Object.keys(FEE_TYPES) as [FeeType]
 
 export interface FeeTypeSelectProps {
   value?: string

@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '../select'
 
-const FEE_INDEX = {
+export const FEE_INDEX = {
   cdi: 'CDI',
   ipca: 'IPCA',
   selic: 'SELIC',
@@ -47,7 +47,7 @@ const FEE_INDEX_ICONS = {
 
 export type FeeIndex = keyof typeof FEE_INDEX
 
-export const FeeIndexSchema = Object.keys(FEE_INDEX) as FeeIndex[]
+export const FeeIndexSchema = Object.keys(FEE_INDEX) as [FeeIndex]
 
 export interface FeeIndexSelectProps {
   value?: string

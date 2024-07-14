@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <label
         htmlFor={id || a11yId}
         className={cn(
-          'relative flex h-10 w-full overflow-hidden rounded-md border border-input bg-background px-3 py-2 ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:cursor-text has-[input[disabled]]:cursor-not-allowed has-[input[disabled]]:opacity-50',
+          'relative flex h-10 w-full overflow-hidden rounded-md border border-input bg-background px-3 py-2 ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:cursor-text has-[input[disabled]]:opacity-50',
           className,
         )}
       >

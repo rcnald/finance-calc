@@ -50,7 +50,7 @@ export const PLURAL_INTERVAL = {
 
 export type Interval = keyof typeof INTERVAL
 
-export const IntervalSchema = Object.keys(INTERVAL) as Interval[]
+export const IntervalSchema = Object.keys(INTERVAL) as [Interval]
 
 export interface IntervalSelectProps {
   value?: string

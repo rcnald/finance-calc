@@ -1,8 +1,7 @@
 'use client'
 
 import { Box } from '@/components/ui/box'
-import { CalcConfig } from '@/components/ui/calc-config'
-import { CalcForm } from '@/components/ui/calc-form'
+import { CalcPeriodForm } from '@/components/ui/calc-form/calc-period-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQueryParams } from '@/hooks/useQueryParams'
 
@@ -16,7 +15,7 @@ const CALC_MODE = {
 
 export type CalcMode = keyof typeof CALC_MODE
 
-export const CalcModeSchema = Object.keys(CALC_MODE) as CalcMode[]
+export const CalcModeSchema = Object.keys(CALC_MODE) as [CalcMode]
 
 export default function Page() {
   const [calcMode, setCalcMode] = useQueryParams<CalcMode>(
@@ -49,9 +48,9 @@ export default function Page() {
                 )
               })}
             </TabsList>
-            <CalcConfig />
+
             <TabsContent value="period">
-              <CalcForm />
+              <CalcPeriodForm />
 
               <Box className="flex flex-col items-center justify-center">
                 <h2 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">

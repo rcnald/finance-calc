@@ -2,11 +2,13 @@
 
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { useState } from 'react'
+import { Controller, useFormContext } from 'react-hook-form'
 
 import { CalcMode, CalcModeSchema } from '@/app/page'
 import { useQueryParams } from '@/hooks/useQueryParams'
 
 import { Button } from '../button'
+import { CalcPeriodSchema } from '../calc-form/calc-period-form'
 import { Checkbox } from '../checkbox'
 import {
   Collapsible,
@@ -22,6 +24,8 @@ import { Interval, IntervalSchema, IntervalSelect } from './interval-select'
 export interface CalcConfigProps {}
 
 export function CalcConfig({ ...props }: CalcConfigProps) {
+  const { control } = useFormContext<CalcPeriodSchema>()
+
   const [isConfigOpen, setIsConfigOpen] = useState(false)
 
   const [calcMode] = useQueryParams<CalcMode>(
@@ -89,10 +93,20 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
                 Tipo
               </Label>
 
-              <FeeTypeSelect
-                id="fee-type"
-                value={feeType}
-                onValueChange={(value) => setFeeType(value as FeeType)}
+              <Controller
+                control={control}
+                name="fee_type"
+                defaultValue={feeType}
+                render={({ field }) => (
+                  <FeeTypeSelect
+                    id="fee-type"
+                    value={feeType}
+                    onValueChange={(value) => {
+                      setFeeType(value as FeeType)
+                      field.onChange(value)
+                    }}
+                  />
+                )}
               />
 
               <Label htmlFor="fee-type" className="text-muted-foreground">
@@ -107,10 +121,20 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
                     Índice
                   </Label>
 
-                  <FeeIndexSelect
-                    id="benchmark"
-                    value={feeIndex}
-                    onValueChange={(value) => setFeeIndex(value as FeeIndex)}
+                  <Controller
+                    control={control}
+                    name="benchmark"
+                    defaultValue={feeIndex}
+                    render={({ field }) => (
+                      <FeeIndexSelect
+                        id="benchmark"
+                        value={feeIndex}
+                        onValueChange={(value) => {
+                          setFeeIndex(value as FeeIndex)
+                          field.onChange(value)
+                        }}
+                      />
+                    )}
                   />
 
                   <Label htmlFor="benchmark" className="text-muted-foreground">
@@ -130,14 +154,24 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
             Prazo
           </Label>
 
-          <IntervalSelect
-            id="period-interval"
-            value={periodInterval}
-            onValueChange={(value) => setPeriodInterval(value as Interval)}
-            className="h-8 w-fit px-2"
-          >
-            <ChevronDown size={16} className="opacity-50" />
-          </IntervalSelect>
+          <Controller
+            control={control}
+            name="period_interval"
+            defaultValue={periodInterval}
+            render={({ field }) => (
+              <IntervalSelect
+                id="period-interval"
+                value={periodInterval}
+                onValueChange={(value) => {
+                  setPeriodInterval(value as Interval)
+                  field.onChange(value)
+                }}
+                className="h-8 w-fit px-2"
+              >
+                <ChevronDown size={16} className="opacity-50" />
+              </IntervalSelect>
+            )}
+          />
         </div>
 
         <div>
@@ -145,12 +179,23 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
             Impostos
           </Label>
           <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
-            <Checkbox
-              id="tax"
-              defaultChecked
-              checked={Boolean(tax)}
-              onCheckedChange={(value) => setTax(value as boolean)}
+            <Controller
+              control={control}
+              name="tax"
+              defaultValue={Boolean(tax)}
+              render={({ field }) => (
+                <Checkbox
+                  id="tax"
+                  defaultChecked
+                  checked={Boolean(tax)}
+                  onCheckedChange={(value) => {
+                    setTax(value as boolean)
+                    field.onChange(value)
+                  }}
+                />
+              )}
             />
+
             <Label htmlFor="tax" className="text-muted-foreground">
               Imposto de renda
             </Label>
@@ -160,12 +205,21 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
         <div>
           <Label className="ml-1 text-sm font-medium leading-none">Cupom</Label>
           <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
-            <Checkbox
-              id="cupom"
-              checked={Boolean(cupom)}
-              onCheckedChange={(value) => {
-                setCupom(value as boolean)
-              }}
+            <Controller
+              control={control}
+              name="cupom"
+              defaultValue={Boolean(cupom)}
+              render={({ field }) => (
+                <Checkbox
+                  id="cupom"
+                  defaultChecked
+                  checked={Boolean(cupom)}
+                  onCheckedChange={(value) => {
+                    setCupom(value as boolean)
+                    field.onChange(value)
+                  }}
+                />
+              )}
             />
             <Label htmlFor="cupom" className="text-muted-foreground">
               Cupom de juros
@@ -180,11 +234,23 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
                 >
                   Intervalo
                 </Label>
-                <IntervalSelect
-                  id="cupom-interval"
-                  value={cupomInterval}
-                  onValueChange={(value) => setCupomInterval(value as Interval)}
+
+                <Controller
+                  control={control}
+                  name="cupom_interval"
+                  defaultValue={cupomInterval}
+                  render={({ field }) => (
+                    <IntervalSelect
+                      id="cupom-interval"
+                      value={cupomInterval}
+                      onValueChange={(value) => {
+                        setCupomInterval(value as Interval)
+                        field.onChange(value)
+                      }}
+                    />
+                  )}
                 />
+
                 <Label htmlFor="interval" className="text-muted-foreground">
                   <ChevronDown size={16} />
                 </Label>

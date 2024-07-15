@@ -6,22 +6,20 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useQueryParams } from '@/hooks/useQueryParams'
-import { formatToCurrency } from '@/lib/utils'
+import { filterDigits, formatToCurrency } from '@/lib/utils'
 
 import { Button } from '../button'
 import { CalcConfig } from '../calc-config'
-import { FeeIndex, FeeIndexSchema } from '../calc-config/fee-index-select'
-import { FeeType, FeeTypeSchema } from '../calc-config/fee-type-select'
 import {
   INTERVAL,
   Interval,
   IntervalSchema,
+  PLURAL_INTERVAL,
 } from '../calc-config/interval-select'
 import { Input, InputUnit } from '../input'
 import { Label } from '../label'
-import { FeeInfoCard } from './fee-info-card'
 
-export interface CalcPeriodFormProps {}
+export interface CalcFeeFormProps {}
 
 const fieldSchema = z
   .string()
@@ -29,42 +27,34 @@ const fieldSchema = z
   .transform((value) => Number(value.replace(/\./g, '').replace(/,/g, '.')))
   .refine((value) => value !== 0, { message: 'O valor não pode ser 0' })
 
-const CalcPeriodSchema = z.object({
+const CalcFeeSchema = z.object({
   future_value: fieldSchema,
   present_value: fieldSchema,
-  fee: fieldSchema,
+  period: fieldSchema,
   contribution: z
     .string()
     .transform((value) => Number(value.replace(/\./g, '').replace(/,/g, '.'))),
-  fee_type: z.enum(FeeTypeSchema),
-  benchmark: z.enum(FeeIndexSchema).optional(),
   period_interval: z.enum(IntervalSchema),
   tax: z.boolean(),
   cupom: z.boolean(),
   cupom_interval: z.enum(IntervalSchema).optional(),
 })
 
-export type CalcPeriodSchema = z.infer<typeof CalcPeriodSchema>
+export type CalcFeeSchema = z.infer<typeof CalcFeeSchema>
 
-export type CalcPeriodKeysSchema = keyof CalcPeriodSchema
+export type CalcFeeKeysSchema = keyof CalcFeeSchema
 
 export type FieldsValidity = Record<
-  keyof CalcPeriodSchema,
+  keyof CalcFeeSchema,
   { error?: boolean; message?: string }
 >
 
-export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
+export function CalcFeeForm({ ...props }: CalcFeeFormProps) {
   const [periodInterval] = useQueryParams<Interval>(
     'period-interval',
     'month',
     IntervalSchema,
   )
-  const [benchmark] = useQueryParams<FeeIndex>(
-    'fee-index',
-    'cdi',
-    FeeIndexSchema,
-  )
-  const [feeType] = useQueryParams<FeeType>('fee-type', 'pre', FeeTypeSchema)
   const [tax] = useQueryParams<boolean>('tax', false, [true, false])
   const [cupom] = useQueryParams<boolean>('cupom', false, [true, false])
   const [cupomInterval] = useQueryParams<Interval>(
@@ -73,11 +63,9 @@ export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
     IntervalSchema,
   )
 
-  const calcPeriodForm = useForm<CalcPeriodSchema>({
-    resolver: zodResolver(CalcPeriodSchema),
+  const calcFeeForm = useForm<CalcFeeSchema>({
+    resolver: zodResolver(CalcFeeSchema),
     defaultValues: {
-      fee_type: feeType,
-      benchmark,
       period_interval: periodInterval,
       tax: Boolean(tax),
       cupom: Boolean(cupom),
@@ -89,11 +77,9 @@ export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
     handleSubmit,
     register,
     formState: { errors },
-  } = calcPeriodForm
+  } = calcFeeForm
 
-  const fieldsKeys = Object.keys(CalcPeriodSchema.shape) as [
-    CalcPeriodKeysSchema,
-  ]
+  const fieldsKeys = Object.keys(CalcFeeSchema.shape) as [CalcFeeKeysSchema]
 
   const fields: FieldsValidity = fieldsKeys.reduce<FieldsValidity>(
     (acc, field) => {
@@ -108,22 +94,49 @@ export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
     {} as FieldsValidity,
   )
 
+  const handleDigitsInputChange: ChangeEventHandler<HTMLInputElement> = (
+    value,
+  ) => (value.target.value = filterDigits(value.target.value))
+
   const handleCurrencyInputChange: ChangeEventHandler<HTMLInputElement> = (
     value,
   ) => (value.target.value = formatToCurrency(value.target.value))
 
-  const handleCalcPeriod = (data: CalcPeriodSchema) => {
+  const handleCalcPeriod = (data: CalcFeeSchema) => {
     console.log(data)
   }
 
   return (
-    <FormProvider {...calcPeriodForm}>
+    <FormProvider {...calcFeeForm}>
       <form
         onSubmit={handleSubmit(handleCalcPeriod)}
         className="flex flex-col gap-4"
         {...props}
       >
         <CalcConfig />
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="period"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Daqui quanto tempo você precisa?
+          </Label>
+          <Input
+            id="period"
+            placeholder="0"
+            inputMode="numeric"
+            className="font-semibold"
+            {...register('period')}
+            onChange={handleDigitsInputChange}
+          >
+            <InputUnit>{PLURAL_INTERVAL[periodInterval]}</InputUnit>
+          </Input>
+          {fields.period.message ? (
+            <span className="text-xs font-bold text-destructive">
+              {fields.period.message}
+            </span>
+          ) : null}
+        </div>
         <div className="flex flex-col gap-2">
           <Label
             htmlFor="future-value"
@@ -174,35 +187,7 @@ export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
             </span>
           ) : null}
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Label
-              htmlFor="fee"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Qual a taxa do seu investimento?
-            </Label>
-            {feeType !== 'pre' ? <FeeInfoCard /> : null}
-          </div>
-          <Input
-            id="fee"
-            placeholder="0,00"
-            inputMode="numeric"
-            className="font-semibold"
-            aria-invalid={fields.fee.error}
-            {...register('fee')}
-            onChange={handleCurrencyInputChange}
-          >
-            <InputUnit className="px-3">
-              % a.{INTERVAL[periodInterval].toLocaleLowerCase()[0]}
-            </InputUnit>
-          </Input>
-          {fields.fee.message ? (
-            <span className="text-xs font-bold text-destructive">
-              {fields.fee.message}
-            </span>
-          ) : null}
-        </div>
+
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Label

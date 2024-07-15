@@ -83,7 +83,7 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
         {calcMode === 'fee' ? null : (
           <div className="flex flex-col gap-1">
             <Label
-              htmlFor="fee"
+              htmlFor="fee-type"
               className="ml-1 text-sm font-medium leading-none"
             >
               Taxa
@@ -175,7 +175,10 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
         </div>
 
         <div>
-          <Label className="ml-1 text-sm font-medium leading-none">
+          <Label
+            htmlFor="tax"
+            className="ml-1 text-sm font-medium leading-none"
+          >
             Impostos
           </Label>
           <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
@@ -203,7 +206,12 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
         </div>
 
         <div>
-          <Label className="ml-1 text-sm font-medium leading-none">Cupom</Label>
+          <Label
+            htmlFor="cupom"
+            className="ml-1 text-sm font-medium leading-none"
+          >
+            Cupom
+          </Label>
           <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
             <Controller
               control={control}
@@ -251,7 +259,10 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
                   )}
                 />
 
-                <Label htmlFor="interval" className="text-muted-foreground">
+                <Label
+                  htmlFor="cupom-interval"
+                  className="text-muted-foreground"
+                >
                   <ChevronDown size={16} />
                 </Label>
               </>

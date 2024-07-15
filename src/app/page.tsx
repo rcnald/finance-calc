@@ -1,6 +1,7 @@
 'use client'
 
 import { Box } from '@/components/ui/box'
+import { CalcFeeForm } from '@/components/ui/calc-form/calc-fee-form'
 import { CalcPeriodForm } from '@/components/ui/calc-form/calc-period-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQueryParams } from '@/hooks/useQueryParams'
@@ -51,8 +52,11 @@ export default function Page() {
 
             <TabsContent value="period">
               <CalcPeriodForm />
-
-              <Box className="flex flex-col items-center justify-center">
+            </TabsContent>
+            <TabsContent value="fee">
+              <CalcFeeForm />
+            </TabsContent>
+            {/* <Box className="flex flex-col items-center justify-center">
                 <h2 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
                   Você precisará de
                 </h2>
@@ -60,8 +64,7 @@ export default function Page() {
                   24
                 </strong>
                 <span className="text-muted-foreground">Meses</span>
-              </Box>
-            </TabsContent>
+              </Box> */}
           </Tabs>
         </section>
       </main>

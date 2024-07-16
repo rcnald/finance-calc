@@ -1,8 +1,11 @@
 'use client'
 
+import { ContributionForm } from '@/components/ui/calc-form/contribution-form'
 // import { Box } from '@/components/ui/box'
-import { CalcFeeForm } from '@/components/ui/calc-form/calc-fee-form'
-import { CalcPeriodForm } from '@/components/ui/calc-form/calc-period-form'
+import { FeeForm } from '@/components/ui/calc-form/fee-form'
+import { FutureValueForm } from '@/components/ui/calc-form/future-value-form'
+import { PeriodForm } from '@/components/ui/calc-form/period-form'
+import { PresentValueForm } from '@/components/ui/calc-form/present-value-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQueryParams } from '@/hooks/useQueryParams'
 
@@ -51,10 +54,19 @@ export default function Page() {
             </TabsList>
 
             <TabsContent value="period">
-              <CalcPeriodForm />
+              <PeriodForm />
             </TabsContent>
             <TabsContent value="fee">
-              <CalcFeeForm />
+              <FeeForm />
+            </TabsContent>
+            <TabsContent value="present-value">
+              <PresentValueForm />
+            </TabsContent>
+            <TabsContent value="future-value">
+              <FutureValueForm />
+            </TabsContent>
+            <TabsContent value="contributions">
+              <ContributionForm />
             </TabsContent>
             {/* <Box className="flex flex-col items-center justify-center">
                 <h2 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">

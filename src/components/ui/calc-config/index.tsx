@@ -16,7 +16,7 @@ import {
 } from '@/lib/data'
 
 import { Button } from '../button'
-import { CalcPeriodSchema } from '../calc-form/calc-period-form'
+import { CalcPeriodSchema } from '../calc-form/present-value-form'
 import { Checkbox } from '../checkbox'
 import {
   Collapsible,
@@ -56,16 +56,13 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
     'month',
     IntervalSchema,
   )
-  const [cupom, setCupom] = useQueryParams<boolean>('cupom', false, [
-    true,
-    false,
-  ])
   const [cupomInterval, setCupomInterval] = useQueryParams<Interval>(
     'cupom-interval',
     'month',
     IntervalSchema,
   )
-  const [tax, setTax] = useQueryParams<boolean>('tax', false, [true, false])
+  const [cupom, setCupom] = useQueryParams<boolean>('cupom', false)
+  const [tax, setTax] = useQueryParams<boolean>('tax', false)
 
   const CollapsibleTriggerIcon = isConfigOpen ? ChevronsDownUp : ChevronsUpDown
 
@@ -193,12 +190,12 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
             <Controller
               control={control}
               name="tax"
-              defaultValue={Boolean(tax)}
+              defaultValue={tax}
               render={({ field }) => (
                 <Checkbox
                   id="tax"
                   defaultChecked
-                  checked={Boolean(tax)}
+                  checked={tax}
                   onCheckedChange={(value) => {
                     setTax(value as boolean)
                     field.onChange(value)
@@ -224,12 +221,12 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
             <Controller
               control={control}
               name="cupom"
-              defaultValue={Boolean(cupom)}
+              defaultValue={cupom}
               render={({ field }) => (
                 <Checkbox
                   id="cupom"
                   defaultChecked
-                  checked={Boolean(cupom)}
+                  checked={cupom}
                   onCheckedChange={(value) => {
                     setCupom(value as boolean)
                     field.onChange(value)

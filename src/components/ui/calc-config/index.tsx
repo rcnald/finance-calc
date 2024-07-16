@@ -6,6 +6,14 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 import { CalcMode, CalcModeSchema } from '@/app/page'
 import { useQueryParams } from '@/hooks/useQueryParams'
+import {
+  FeeIndex,
+  FeeIndexSchema,
+  FeeType,
+  FeeTypeSchema,
+  Interval,
+  IntervalSchema,
+} from '@/lib/data'
 
 import { Button } from '../button'
 import { CalcPeriodSchema } from '../calc-form/calc-period-form'
@@ -17,9 +25,9 @@ import {
 } from '../collapsible'
 import { Label } from '../label'
 import { Separator } from '../separator'
-import { FeeIndex, FeeIndexSchema, FeeIndexSelect } from './fee-index-select'
-import { FeeType, FeeTypeSchema, FeeTypeSelect } from './fee-type-select'
-import { Interval, IntervalSchema, IntervalSelect } from './interval-select'
+import { FeeIndexSelect } from './fee-index-select'
+import { FeeTypeSelect } from './fee-type-select'
+import { IntervalSelect } from './interval-select'
 
 export interface CalcConfigProps {}
 

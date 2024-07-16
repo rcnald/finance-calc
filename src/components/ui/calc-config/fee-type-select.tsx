@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
+import { FEE_TYPES, FeeType } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../button'
@@ -33,21 +34,11 @@ import {
   SelectValue,
 } from '../select'
 
-export const FEE_TYPES = {
-  pre: 'Pré-fixado',
-  pos: 'Pós-fixado',
-  indexed: 'Indexado',
-} as const
-
 const FEE_TYPES_ICONS = {
   pre: Lock,
   pos: ArrowDownUp,
   indexed: ArrowUpNarrowWide,
 } as const
-
-export type FeeType = keyof typeof FEE_TYPES
-
-export const FeeTypeSchema = Object.keys(FEE_TYPES) as [FeeType]
 
 export interface FeeTypeSelectProps {
   value?: string

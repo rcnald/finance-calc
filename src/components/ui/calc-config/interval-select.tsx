@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
+import { INTERVAL, Interval } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../button'
@@ -31,26 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../select'
-
-export const INTERVAL = {
-  month: 'Mês',
-  year: 'Ano',
-  'half-year': 'Semestre',
-  'two-months': 'Bimestre',
-  quarter: 'Trimestre',
-} as const
-
-export const PLURAL_INTERVAL = {
-  month: 'Meses',
-  year: 'Anos',
-  'half-year': 'Semestres',
-  'two-months': 'Bimestres',
-  quarter: 'Trimestres',
-} as const
-
-export type Interval = keyof typeof INTERVAL
-
-export const IntervalSchema = Object.keys(INTERVAL) as [Interval]
 
 export interface IntervalSelectProps {
   value?: string

@@ -2,13 +2,9 @@ import { Info } from 'lucide-react'
 import { useMediaQuery } from 'usehooks-ts'
 
 import { useQueryParams } from '@/hooks/useQueryParams'
+import { FEE_INDEX, FeeIndex, FeeIndexSchema } from '@/lib/data'
 
 import { Button } from '../button'
-import {
-  FEE_INDEX,
-  FeeIndex,
-  FeeIndexSchema,
-} from '../calc-config/fee-index-select'
 import {
   Drawer,
   DrawerClose,

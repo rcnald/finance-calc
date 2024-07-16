@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
+import { FEE_INDEX, FeeIndex } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../button'
@@ -33,21 +34,11 @@ import {
   SelectValue,
 } from '../select'
 
-export const FEE_INDEX = {
-  cdi: 'CDI',
-  ipca: 'IPCA',
-  selic: 'SELIC',
-} as const
-
 const FEE_INDEX_ICONS = {
   cdi: TicketPercent,
   ipca: Activity,
   selic: BadgeDollarSign,
 } as const
-
-export type FeeIndex = keyof typeof FEE_INDEX
-
-export const FeeIndexSchema = Object.keys(FEE_INDEX) as [FeeIndex]
 
 export interface FeeIndexSelectProps {
   value?: string

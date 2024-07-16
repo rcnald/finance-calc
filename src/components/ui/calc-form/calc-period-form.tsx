@@ -5,18 +5,17 @@ import { ChangeEventHandler } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { useQueryParams } from '@/hooks/useQueryParams'
+import { useConfigParams } from '@/hooks/useConfigParams'
+import {
+  FeeIndexSchema,
+  FeeTypeSchema,
+  INTERVAL,
+  IntervalSchema,
+} from '@/lib/data'
 import { formatToCurrency } from '@/lib/utils'
 
 import { Button } from '../button'
 import { CalcConfig } from '../calc-config'
-import { FeeIndex, FeeIndexSchema } from '../calc-config/fee-index-select'
-import { FeeType, FeeTypeSchema } from '../calc-config/fee-type-select'
-import {
-  INTERVAL,
-  Interval,
-  IntervalSchema,
-} from '../calc-config/interval-select'
 import { Input, InputUnit } from '../input'
 import { Label } from '../label'
 import { FeeInfoCard } from './fee-info-card'
@@ -54,24 +53,8 @@ export type FieldsValidity = Record<
 >
 
 export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
-  const [periodInterval] = useQueryParams<Interval>(
-    'period-interval',
-    'month',
-    IntervalSchema,
-  )
-  const [benchmark] = useQueryParams<FeeIndex>(
-    'fee-index',
-    'cdi',
-    FeeIndexSchema,
-  )
-  const [feeType] = useQueryParams<FeeType>('fee-type', 'pre', FeeTypeSchema)
-  const [tax] = useQueryParams<boolean>('tax', false, [true, false])
-  const [cupom] = useQueryParams<boolean>('cupom', false, [true, false])
-  const [cupomInterval] = useQueryParams<Interval>(
-    'cupom-interval',
-    'month',
-    IntervalSchema,
-  )
+  const { periodInterval, tax, cupom, cupomInterval, benchmark, feeType } =
+    useConfigParams()
 
   const calcPeriodForm = useForm<CalcPeriodSchema>({
     resolver: zodResolver(CalcPeriodSchema),

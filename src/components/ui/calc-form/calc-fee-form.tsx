@@ -37,9 +37,9 @@ export function CalcFeeForm() {
   const calcFeeForm = useForm<CalcFeeSchema>({
     resolver: zodResolver(CalcFeeSchema),
     defaultValues: {
+      tax,
+      cupom,
       period_interval: periodInterval,
-      tax: Boolean(tax),
-      cupom: Boolean(cupom),
       cupom_interval: cupomInterval,
     },
   })

@@ -59,11 +59,11 @@ export function CalcPeriodForm({ ...props }: CalcPeriodFormProps) {
   const calcPeriodForm = useForm<CalcPeriodSchema>({
     resolver: zodResolver(CalcPeriodSchema),
     defaultValues: {
-      fee_type: feeType,
+      tax,
+      cupom,
       benchmark,
+      fee_type: feeType,
       period_interval: periodInterval,
-      tax: Boolean(tax),
-      cupom: Boolean(cupom),
       cupom_interval: cupomInterval,
     },
   })

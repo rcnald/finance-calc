@@ -55,10 +55,8 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
   const CalcFormProvider = ({ children, ...props }: CalcFormProviderProps) => {
     return (
       <FormProvider {...calcForm}>
-        <form {...props}>
-          <CalcConfig />
-          {children}
-        </form>
+        <CalcConfig />
+        <form {...props}>{children}</form>
       </FormProvider>
     )
   }

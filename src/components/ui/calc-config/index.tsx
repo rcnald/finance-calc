@@ -14,9 +14,9 @@ import {
   Interval,
   IntervalSchema,
 } from '@/lib/data'
+import { ConfigSchemaType } from '@/lib/utils'
 
 import { Button } from '../button'
-import { CalcPeriodSchema } from '../calc-form/present-value-form'
 import { Checkbox } from '../checkbox'
 import {
   Collapsible,
@@ -29,12 +29,17 @@ import { FeeIndexSelect } from './fee-index-select'
 import { FeeTypeSelect } from './fee-type-select'
 import { IntervalSelect } from './interval-select'
 
-export interface CalcConfigProps {}
+// export interface CalcConfigProps {
+//   open: boolean
+//   onOpenChange: (value: boolean) => void
+// }
 
-export function CalcConfig({ ...props }: CalcConfigProps) {
-  const { control } = useFormContext<CalcPeriodSchema>()
+// { open, onOpenChange }: CalcConfigProps
 
-  const [isConfigOpen, setIsConfigOpen] = useState(false)
+export function CalcConfig() {
+  const [open, setOpen] = useState(false)
+
+  const { control } = useFormContext<ConfigSchemaType>()
 
   const [calcMode] = useQueryParams<CalcMode>(
     'calc-mode',
@@ -64,14 +69,13 @@ export function CalcConfig({ ...props }: CalcConfigProps) {
   const [cupom, setCupom] = useQueryParams<boolean>('cupom', false)
   const [tax, setTax] = useQueryParams<boolean>('tax', false)
 
-  const CollapsibleTriggerIcon = isConfigOpen ? ChevronsDownUp : ChevronsUpDown
+  const CollapsibleTriggerIcon = open ? ChevronsDownUp : ChevronsUpDown
 
   return (
     <Collapsible
-      open={isConfigOpen}
-      onOpenChange={setIsConfigOpen}
+      open={open}
+      onOpenChange={setOpen}
       className="flex flex-col gap-2"
-      {...props}
     >
       <div className="flex items-center justify-between">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

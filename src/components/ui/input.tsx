@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <label
         htmlFor={id || a11yId}
         className={cn(
-          'relative flex h-10 w-full overflow-hidden rounded-md border border-input bg-background px-3 py-2 ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:cursor-text has-[input[disabled]]:opacity-50',
+          'relative flex h-10 w-full overflow-hidden rounded-md border border-input bg-background px-3 py-2 font-semibold ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:cursor-text has-[span[data-corner="left"]]:pl-12 has-[input[disabled]]:opacity-50',
           className,
         )}
       >
@@ -41,6 +41,7 @@ const InputUnit = React.forwardRef<HTMLSpanElement, InputUnitProps>(
     return (
       <span
         ref={ref}
+        data-corner={corner}
         className={cn(
           'absolute right-0 top-0 flex h-full items-center justify-center border-l border-input bg-muted px-2 font-medium text-muted-foreground',
           { 'left-0 right-auto border-l-0 border-r': corner === 'left' },

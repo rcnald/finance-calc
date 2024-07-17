@@ -4,10 +4,11 @@ import { z } from 'zod'
 
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
-import { INTERVAL, PLURAL_INTERVAL } from '@/lib/data'
 import {
   ConfigSchema,
   FieldSchema,
+  getPeriod,
+  getPeriodUnit,
   handleCurrencyInputChange,
   handleDigitsInputChange,
 } from '@/lib/utils'
@@ -35,6 +36,9 @@ export function FeeForm() {
 
   const { handleSubmit, register } = calcForm
 
+  const periodUnit = getPeriodUnit(periodInterval)
+  const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
+
   const handleCalcPeriod = (data: CalcFeeSchema) => {
     console.log(data)
   }
@@ -45,109 +49,88 @@ export function FeeForm() {
       className="flex flex-col gap-4"
     >
       <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="period"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Daqui quanto tempo você precisa?
-        </Label>
+        <Label htmlFor="present-value">Quanto você tem hoje?</Label>
         <Input
-          id="period"
+          id="present-value"
           placeholder="0"
           inputMode="numeric"
-          className="font-semibold"
-          {...register('period')}
-          onChange={handleDigitsInputChange}
+          aria-invalid={fieldsState.present_value.error}
+          {...register('present_value', {
+            onChange: handleCurrencyInputChange,
+          })}
         >
-          <InputUnit>{PLURAL_INTERVAL[periodInterval]}</InputUnit>
+          <InputUnit corner="left">R$</InputUnit>
         </Input>
-        {fieldsState.period?.message ? (
-          <span className="text-xs font-bold text-destructive">
-            {fieldsState.period?.message}
-          </span>
-        ) : null}
+        <Label
+          htmlFor="present-value"
+          className="text-xs font-bold text-destructive"
+          aria-hidden={!fieldsState.present_value.error}
+        >
+          {fieldsState.present_value.message}
+        </Label>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label
-          htmlFor="future-value"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Quanto você precisa?
-        </Label>
+        <Label htmlFor="future-value">Quanto você precisa?</Label>
         <Input
           id="future-value"
           placeholder="0"
           inputMode="numeric"
-          className="pl-12 font-semibold"
-          aria-invalid={fieldsState.future_value?.error}
-          {...register('future_value')}
-          onChange={handleCurrencyInputChange}
+          aria-invalid={fieldsState.future_value.error}
+          {...register('future_value', { onChange: handleCurrencyInputChange })}
         >
           <InputUnit corner="left">R$</InputUnit>
         </Input>
-        {fieldsState.future_value?.message ? (
-          <span className="text-xs font-bold text-destructive">
-            {fieldsState.future_value?.message}
-          </span>
-        ) : null}
+        <Label
+          htmlFor="future-value"
+          className="text-xs font-bold text-destructive"
+          aria-hidden={!fieldsState.future_value.error}
+        >
+          {fieldsState.future_value.message}
+        </Label>
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Label
-            htmlFor="present-value"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Quanto você tem hoje?
-          </Label>
-        </div>
+        <Label htmlFor="period">Daqui quanto tempo você precisa?</Label>
         <Input
-          id="present-value"
-          placeholder="0,00"
+          id="period"
+          placeholder="0"
           inputMode="numeric"
-          className="pl-12 font-semibold"
-          aria-invalid={fieldsState.present_value?.error}
-          {...register('present_value')}
-          onChange={handleCurrencyInputChange}
+          aria-invalid={fieldsState.period.error}
+          {...register('period', { onChange: handleDigitsInputChange })}
         >
-          <InputUnit corner="left">R$</InputUnit>
+          <InputUnit>{periodUnit}</InputUnit>
         </Input>
-        {fieldsState.present_value?.message ? (
-          <span className="text-xs font-bold text-destructive">
-            {fieldsState.present_value?.message}
-          </span>
-        ) : null}
+        <Label
+          htmlFor="period"
+          className="text-xs font-bold text-destructive"
+          aria-hidden={!fieldsState.period.error}
+        >
+          {fieldsState.period.message}
+        </Label>
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Label
-            htmlFor="contribution"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Quanto você vai investir regularmente?
-          </Label>
-        </div>
+        <Label htmlFor="contribution">
+          Quanto você vai investir regularmente?
+        </Label>
         <Input
           id="contribution"
           placeholder="0,00"
           inputMode="numeric"
-          className="pl-12 font-semibold"
-          aria-invalid={fieldsState.contribution?.error}
-          {...register('contribution')}
-          onChange={handleCurrencyInputChange}
+          aria-invalid={fieldsState.contribution.error}
+          {...register('contribution', { onChange: handleCurrencyInputChange })}
         >
           <InputUnit corner="left">R$</InputUnit>
-          <InputUnit corner="right">
-            Por {INTERVAL[periodInterval].toLocaleLowerCase()}
-          </InputUnit>
+          <InputUnit corner="right">Por {contributionPeriodUnit}</InputUnit>
         </Input>
-        {fieldsState.contribution?.message ? (
-          <span className="text-xs font-bold text-destructive">
-            {fieldsState.contribution?.message}
-          </span>
-        ) : null}
+        <Label
+          htmlFor="contribution"
+          className="text-xs font-bold text-destructive"
+          aria-hidden={!fieldsState.contribution.error}
+        >
+          {fieldsState.contribution.message}
+        </Label>
       </div>
 
       <Button type="submit" className="w-full">

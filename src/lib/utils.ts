@@ -3,7 +3,14 @@ import { ChangeEventHandler } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 
-import { FeeIndexSchema, FeeTypeSchema, IntervalSchema } from './data'
+import {
+  FeeIndexSchema,
+  FeeTypeSchema,
+  INTERVAL,
+  Interval,
+  IntervalSchema,
+  PLURAL_INTERVAL,
+} from './data'
 
 export const ConfigSchema = z.object({
   fee_type: z.enum(FeeTypeSchema),
@@ -46,3 +53,11 @@ export const handleDigitsInputChange: ChangeEventHandler<HTMLInputElement> = (
 export const handleCurrencyInputChange: ChangeEventHandler<HTMLInputElement> = (
   value,
 ) => (value.target.value = formatToCurrency(value.target.value))
+
+export const getPeriod = (periodInterval: Interval) => {
+  return INTERVAL[periodInterval]
+}
+
+export const getPeriodUnit = (periodInterval: Interval) => {
+  return PLURAL_INTERVAL[periodInterval]
+}

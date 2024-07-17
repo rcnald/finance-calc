@@ -65,7 +65,7 @@ export default function Page() {
             <TabsContent value="future-value">
               <FutureValueForm />
             </TabsContent>
-            <TabsContent value="contributions">
+            <TabsContent value="contribution">
               <ContributionForm />
             </TabsContent>
             {/* <Box className="flex flex-col items-center justify-center">

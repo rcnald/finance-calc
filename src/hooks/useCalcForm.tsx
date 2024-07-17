@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { ComponentProps } from 'react'
+import React, { ComponentProps, useState } from 'react'
 import { DefaultValues, FormProvider, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -22,6 +22,8 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
 ) {
   const { periodInterval, benchmark, feeType, tax, cupom, cupomInterval } =
     useConfigParams()
+
+  const [open, setOpen] = useState(false)
 
   const calcForm = useForm<T>({
     resolver: zodResolver(schema),
@@ -55,7 +57,7 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
   const CalcFormProvider = ({ children, ...props }: CalcFormProviderProps) => {
     return (
       <FormProvider {...calcForm}>
-        <CalcConfig />
+        <CalcConfig open={open} onOpenChange={setOpen} />
         <form {...props}>{children}</form>
       </FormProvider>
     )

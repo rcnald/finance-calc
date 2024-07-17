@@ -1,7 +1,6 @@
 'use client'
 
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
-import { useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 
 import { CalcMode, CalcModeSchema } from '@/app/page'
@@ -29,16 +28,12 @@ import { FeeIndexSelect } from './fee-index-select'
 import { FeeTypeSelect } from './fee-type-select'
 import { IntervalSelect } from './interval-select'
 
-// export interface CalcConfigProps {
-//   open: boolean
-//   onOpenChange: (value: boolean) => void
-// }
+export interface CalcConfigProps {
+  open?: boolean
+  onOpenChange?: (value: boolean) => void
+}
 
-// { open, onOpenChange }: CalcConfigProps
-
-export function CalcConfig() {
-  const [open, setOpen] = useState(false)
-
+export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
   const { control } = useFormContext<ConfigSchemaType>()
 
   const [calcMode] = useQueryParams<CalcMode>(
@@ -74,7 +69,7 @@ export function CalcConfig() {
   return (
     <Collapsible
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       className="flex flex-col gap-2"
     >
       <div className="flex items-center justify-between">

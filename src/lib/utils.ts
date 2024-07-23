@@ -153,6 +153,11 @@ export function convertFeeToDaily(interval: Interval, fee: number) {
   return Math.pow(1 + fee, 1 / intervalInDays) - 1
 }
 
+export function convertFeeToAnnual(interval: Interval, fee: number) {
+  const dailyFee = convertFeeToDaily(interval, fee)
+  return Math.pow(1 + dailyFee, yearInDays) - 1
+}
+
 export function getTaxByPeriod(days: number) {
   if (days <= 180) {
     return IR.bellow180days
@@ -277,22 +282,31 @@ export function calcCupomPaymentAmount(
   const cupomIntervalInBusinessDays =
     convertDaysToBusinessDays(cupomIntervalInDays)
 
+  let cupomAmountDiscounted = 0
   let cupomAmount = 0
   let count = 0
   let periodInDays = 0
   let periodInBusinessDays = 0
 
-  while (cupomAmount < income) {
+  while (cupomAmountDiscounted < income) {
     periodInDays += cupomIntervalInDays
     periodInBusinessDays += cupomIntervalInBusinessDays
 
     const tax = hasTax ? getTaxByPeriod(periodInDays) : 0
 
-    cupomAmount += cupomPayment - cupomPayment * tax
+    cupomAmountDiscounted += cupomPayment - cupomPayment * tax
+    cupomAmount += cupomPayment
+
     count += 1
   }
 
   const paymentAverage = cupomAmount / count
 
-  return { cupomAmount, periodInDays, periodInBusinessDays, paymentAverage }
+  return {
+    cupomAmountDiscounted,
+    cupomAmount,
+    periodInDays,
+    periodInBusinessDays,
+    paymentAverage,
+  }
 }

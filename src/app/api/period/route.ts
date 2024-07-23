@@ -8,6 +8,7 @@ import {
   convertContributionPerDay,
   convertDailyPeriodToInterval,
   convertDaysToBusinessDays,
+  convertFeeToAnnual,
   convertFeeToDaily,
   convertIntervalToBusinessDays,
   getTaxByPeriod,
@@ -42,27 +43,29 @@ export interface GetPeriodResponse {
   tax?: number
   benchmark?: FeeIndex
   feeType: FeeType
+  annualIncomeFee: number
+  realAnnualIncomeFee: number
+  realIncome: number
 }
 
 export async function POST(request: Request) {
   const {
     future_value: futureValue,
-    contribution = 0,
     present_value: presentValue,
+    period_interval: periodInterval,
+    fee_type: feeType = 'pre',
+    tax: isTax,
+    contribution = 0,
     fee,
     benchmark,
-    fee_type: feeType = 'pre',
-    period_interval: periodInterval,
-    tax: isTax,
     cupom,
   }: GetPeriodBody = await request.json()
 
-  const benchmarkDailyFee = benchmark
+  const dailyBenchmarkFee = benchmark
     ? convertFeeToDaily('year', BENCHMARKS[benchmark])
     : 1
-
-  const feeDaily = benchmark
-    ? benchmarkDailyFee * fee
+  const dailyFee = benchmark
+    ? fee * dailyBenchmarkFee
     : convertFeeToDaily(periodInterval, fee)
   const contributionDaily = convertContributionPerDay(
     periodInterval,
@@ -75,6 +78,9 @@ export async function POST(request: Request) {
   let discountedIncome = 0
   let futureValueGross = 0
   let investedAmount = 0
+  let annualIncomeFee = 0
+  let realAnnualIncomeFee = 0
+  let realIncome = 0
 
   let periodResponse: GetPeriodResponse
 
@@ -85,24 +91,19 @@ export async function POST(request: Request) {
 
     const cupomPayment = calcCupomPayment(
       presentValue,
-      feeDaily,
+      dailyFee,
       cupomIntervalInBusinessDays,
     )
 
     income = futureValue - presentValue
 
     const {
-      cupomAmount: cupomAmountDiscounted,
+      cupomAmountDiscounted,
+      cupomAmount,
       periodInBusinessDays: periodBusiness,
       periodInDays: period,
       paymentAverage,
     } = calcCupomPaymentAmount(cupomPayment, cupomIntervalInDays, income, isTax)
-
-    const { cupomAmount } = calcCupomPaymentAmount(
-      cupomPayment,
-      cupomIntervalInDays,
-      income,
-    )
 
     periodInBusinessDays = periodBusiness
     periodInDays = period
@@ -110,12 +111,17 @@ export async function POST(request: Request) {
     income = cupomAmount
     discountedIncome = cupomAmountDiscounted
     futureValueGross = cupomAmount + presentValue
+    annualIncomeFee = convertFeeToAnnual(periodInterval, fee)
+    realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
+    realIncome = cupomAmountDiscounted / (1 + BENCHMARKS.ipca)
 
     periodResponse = {
       presentValue,
       futureValue: Number((cupomAmountDiscounted + presentValue).toFixed(2)),
       futureValueGross: Number(futureValueGross.toFixed(2)),
-      fee,
+      fee: Number(fee.toFixed(4)),
+      annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
+      realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
       feeType,
       periodInDays,
       periodInBusinessDays,
@@ -124,6 +130,7 @@ export async function POST(request: Request) {
       cupomPaymentAverage: Number(paymentAverage.toFixed(2)),
       investedAmount: Number(investedAmount.toFixed(2)),
       income: Number(income.toFixed(2)),
+      realIncome: Number(realIncome.toFixed(2)),
     }
 
     if (benchmark) periodResponse.benchmark = benchmark
@@ -136,7 +143,7 @@ export async function POST(request: Request) {
 
   periodInBusinessDays = calcPeriodInBusinessDays({
     contribution: contributionDaily,
-    fee: feeDaily,
+    fee: dailyFee,
     futureValue,
     presentValue,
   })
@@ -162,7 +169,7 @@ export async function POST(request: Request) {
 
   periodInBusinessDays = calcPeriodInBusinessDays({
     contribution: contributionDaily,
-    fee: feeDaily,
+    fee: dailyFee,
     futureValue: futureValueGross,
     presentValue,
   })
@@ -186,19 +193,25 @@ export async function POST(request: Request) {
   investedAmount = presentValue + period * contribution
   discountedIncome = income - income * tax
   futureValueGross = investedAmount + income
+  annualIncomeFee = convertFeeToAnnual(periodInterval, fee)
+  realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
+  realIncome = discountedIncome / (1 + BENCHMARKS.ipca)
 
   periodResponse = {
     presentValue,
     futureValue,
     futureValueGross: Number(futureValueGross.toFixed(2)),
     contribution,
-    fee,
+    fee: Number(fee.toFixed(4)),
+    annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
+    realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
     feeType,
     periodInDays,
     periodInBusinessDays,
     periodInterval,
     investedAmount: Number(investedAmount.toFixed(2)),
     income: Number(income.toFixed(2)),
+    realIncome: Number(realIncome.toFixed(2)),
   }
 
   if (benchmark) periodResponse.benchmark = benchmark

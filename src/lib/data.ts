@@ -1,3 +1,15 @@
+export const CALC_MODE = {
+  period: 'Prazo',
+  fee: 'Taxa',
+  'present-value': 'V. Presente',
+  'future-value': 'V. Futuro',
+  contributions: 'Aportes',
+} as const
+
+export type CalcMode = keyof typeof CALC_MODE
+
+export const CalcModeSchema = Object.keys(CALC_MODE) as [CalcMode]
+
 export const FEE_INDEX = {
   cdi: 'CDI',
   ipca: 'IPCA',
@@ -37,3 +49,22 @@ export const PLURAL_INTERVAL = {
 export type Interval = keyof typeof INTERVAL
 
 export const IntervalSchema = Object.keys(INTERVAL) as [Interval]
+
+export const monthInDays = 30
+export const twoMonthsInDays = 60
+export const quarterInDays = 90
+export const halfYearInDays = 182.5
+export const yearInDays = 365
+
+export const IR = {
+  bellow180days: 0.225,
+  between181and360days: 0.2,
+  between361and720days: 0.175,
+  above721days: 0.15,
+} as const
+
+export const BENCHMARKS = {
+  cdi: 0.104,
+  selic: 0.105,
+  ipca: 0.0405,
+} as const

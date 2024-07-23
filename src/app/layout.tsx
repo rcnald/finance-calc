@@ -2,6 +2,7 @@ import './globals.css'
 
 import type { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
+import { Suspense } from 'react'
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -29,7 +30,9 @@ export default function RootLayout({
           fontSans.variable,
         )}
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <Suspense fallback={'sexo'}>
+          <TooltipProvider>{children}</TooltipProvider>
+        </Suspense>
       </body>
     </html>
   )

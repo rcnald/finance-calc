@@ -3,9 +3,10 @@
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Controller, useFormContext } from 'react-hook-form'
 
-import { CalcMode, CalcModeSchema } from '@/app/page'
 import { useQueryParams } from '@/hooks/useQueryParams'
 import {
+  CalcMode,
+  CalcModeSchema,
   FeeIndex,
   FeeIndexSchema,
   FeeType,

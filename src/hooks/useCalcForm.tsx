@@ -19,6 +19,7 @@ type CalcSchemaType = {
 
 export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
   schema: z.ZodObject<z.ZodRawShape, z.UnknownKeysParam, z.ZodTypeAny>,
+  defaultValues?: DefaultValues<T>,
 ) {
   const { periodInterval, benchmark, feeType, tax, cupom, cupomInterval } =
     useConfigParams()
@@ -34,6 +35,7 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
       fee_type: feeType,
       period_interval: periodInterval,
       tax,
+      ...defaultValues,
     } as DefaultValues<T>,
   })
 
@@ -57,8 +59,10 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
   const CalcFormProvider = ({ children, ...props }: CalcFormProviderProps) => {
     return (
       <FormProvider {...calcForm}>
-        <CalcConfig open={open} onOpenChange={setOpen} />
-        <form {...props}>{children}</form>
+        <form {...props}>
+          <CalcConfig open={open} onOpenChange={setOpen} />
+          {children}
+        </form>
       </FormProvider>
     )
   }

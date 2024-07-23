@@ -289,3 +289,16 @@ Usuário
   - Para o cálculo do imposto de renda, a tabela de alíquotas aplicável deve ser utilizada.
 
 </details>
+
+primeiro mostrar quais os dados ele levou em conta
+valor inicial
+taxa de * % do * a.*
+* aportes de * por *
+valor aplicado acumulado
+valor do rendimento
+valor total
+quanto rendeu em %
+quanto rendeu em % valor liquido (descontar inflação)
+inflação atual
+incognita
+período

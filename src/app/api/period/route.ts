@@ -3,14 +3,12 @@ import {
   calcCupomPayment,
   calcCupomPaymentAmount,
   calcGrossIncome,
-  calcPeriodInBusinessDays,
-  convertBusinessDaysToCalendarDays,
-  convertContributionPerDay,
-  convertDailyPeriodToInterval,
-  convertDaysToBusinessDays,
+  calcPeriodInMonths,
+  convertContributionToMonthly,
   convertFeeToAnnual,
-  convertFeeToDaily,
-  convertIntervalToBusinessDays,
+  convertFeeToMonthly,
+  convertIntervalToMonths,
+  convertMonthlyPeriodToInterval,
   getTaxByPeriod,
 } from '@/lib/utils'
 
@@ -61,19 +59,18 @@ export async function POST(request: Request) {
     cupom,
   }: GetPeriodBody = await request.json()
 
-  const dailyBenchmarkFee = benchmark
-    ? convertFeeToDaily('year', BENCHMARKS[benchmark])
+  const monthlyBenchmarkFee = benchmark
+    ? convertFeeToMonthly('year', BENCHMARKS[benchmark])
     : 1
-  const dailyFee = benchmark
-    ? fee * dailyBenchmarkFee
-    : convertFeeToDaily(periodInterval, fee)
-  const contributionDaily = convertContributionPerDay(
+  const monthlyFee = benchmark
+    ? fee * monthlyBenchmarkFee
+    : convertFeeToMonthly(periodInterval, fee)
+  const monthlyContribution = convertContributionToMonthly(
     periodInterval,
     contribution,
   )
 
-  let periodInBusinessDays = 0
-  let periodInDays = 0
+  let periodInMonths = 0
   let income = 0
   let discountedIncome = 0
   let futureValueGross = 0
@@ -85,14 +82,12 @@ export async function POST(request: Request) {
   let periodResponse: GetPeriodResponse
 
   if (cupom) {
-    const cupomIntervalInDays = convertIntervalToBusinessDays(cupom)
-    const cupomIntervalInBusinessDays =
-      convertDaysToBusinessDays(cupomIntervalInDays)
+    const cupomIntervalInMonths = convertIntervalToMonths(cupom)
 
     const cupomPayment = calcCupomPayment(
       presentValue,
-      dailyFee,
-      cupomIntervalInBusinessDays,
+      monthlyFee,
+      cupomIntervalInMonths,
     )
 
     income = futureValue - presentValue
@@ -100,14 +95,16 @@ export async function POST(request: Request) {
     const {
       cupomAmountDiscounted,
       cupomAmount,
-      periodInBusinessDays: periodBusiness,
-      periodInDays: period,
+      periodInMonths,
       paymentAverage,
-    } = calcCupomPaymentAmount(cupomPayment, cupomIntervalInDays, income, isTax)
+    } = calcCupomPaymentAmount(
+      cupomPayment,
+      cupomIntervalInMonths,
+      income,
+      isTax,
+    )
 
-    periodInBusinessDays = periodBusiness
-    periodInDays = period
-    investedAmount = presentValue + period * contribution
+    investedAmount = presentValue
     income = cupomAmount
     discountedIncome = cupomAmountDiscounted
     futureValueGross = cupomAmount + presentValue
@@ -123,8 +120,8 @@ export async function POST(request: Request) {
       annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
       realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
       feeType,
-      periodInDays,
-      periodInBusinessDays,
+      periodInDays: Math.floor(periodInMonths * 30),
+      periodInBusinessDays: Math.floor(periodInMonths * 21),
       periodInterval,
       cupomInterval: cupom,
       cupomPaymentAverage: Number(paymentAverage.toFixed(2)),
@@ -141,21 +138,16 @@ export async function POST(request: Request) {
     return Response.json(periodResponse)
   }
 
-  periodInBusinessDays = calcPeriodInBusinessDays({
-    contribution: contributionDaily,
-    fee: dailyFee,
+  periodInMonths = calcPeriodInMonths({
+    contribution: monthlyContribution,
+    fee: monthlyFee,
     futureValue,
     presentValue,
   })
 
-  periodInDays = convertBusinessDaysToCalendarDays(
-    new Date(),
-    periodInBusinessDays,
-  )
+  const tax = getTaxByPeriod(periodInMonths * 30)
 
-  const tax = getTaxByPeriod(periodInDays)
-
-  let period = convertDailyPeriodToInterval(periodInterval, periodInDays)
+  let period = convertMonthlyPeriodToInterval(periodInterval, periodInMonths)
 
   income = calcGrossIncome({
     futureValue,
@@ -167,19 +159,14 @@ export async function POST(request: Request) {
 
   futureValueGross = period * contribution + presentValue + income
 
-  periodInBusinessDays = calcPeriodInBusinessDays({
-    contribution: contributionDaily,
-    fee: dailyFee,
+  periodInMonths = calcPeriodInMonths({
+    contribution: monthlyContribution,
+    fee: monthlyFee,
     futureValue: futureValueGross,
     presentValue,
   })
 
-  periodInDays = convertBusinessDaysToCalendarDays(
-    new Date(),
-    periodInBusinessDays,
-  )
-
-  period = convertDailyPeriodToInterval(periodInterval, periodInDays)
+  period = convertMonthlyPeriodToInterval(periodInterval, periodInMonths)
 
   income = calcGrossIncome({
     futureValue,
@@ -191,7 +178,7 @@ export async function POST(request: Request) {
   if (isTax) income = income / (1 - tax)
 
   investedAmount = presentValue + period * contribution
-  discountedIncome = income - income * tax
+  discountedIncome = income - income * (isTax ? tax : 0)
   futureValueGross = investedAmount + income
   annualIncomeFee = convertFeeToAnnual(periodInterval, fee)
   realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
@@ -206,8 +193,8 @@ export async function POST(request: Request) {
     annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
     realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
     feeType,
-    periodInDays,
-    periodInBusinessDays,
+    periodInDays: Math.floor(periodInMonths * 30),
+    periodInBusinessDays: Math.floor(periodInMonths * 21),
     periodInterval,
     investedAmount: Number(investedAmount.toFixed(2)),
     income: Number(income.toFixed(2)),

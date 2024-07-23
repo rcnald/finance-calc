@@ -50,11 +50,11 @@ export type Interval = keyof typeof INTERVAL
 
 export const IntervalSchema = Object.keys(INTERVAL) as [Interval]
 
-export const monthInDays = 30
-export const twoMonthsInDays = 60
-export const quarterInDays = 90
-export const halfYearInDays = 182.5
-export const yearInDays = 365
+export const monthInMonths = 1
+export const twoMonthsInMonths = 2
+export const quarterInMonths = 3
+export const halfYearInMonths = 6
+export const yearInMonths = 12
 
 export const IR = {
   bellow180days: 0.225,

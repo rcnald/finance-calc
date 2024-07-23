@@ -1,5 +1,4 @@
 import { type ClassValue, clsx } from 'clsx'
-import { addDays, eachDayOfInterval, isWeekend } from 'date-fns'
 import { ChangeEventHandler } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
@@ -7,16 +6,16 @@ import { z } from 'zod'
 import {
   FeeIndexSchema,
   FeeTypeSchema,
-  halfYearInDays,
+  halfYearInMonths,
   INTERVAL,
   Interval,
   IntervalSchema,
   IR,
-  monthInDays,
+  monthInMonths,
   PLURAL_INTERVAL,
-  quarterInDays,
-  twoMonthsInDays,
-  yearInDays,
+  quarterInMonths,
+  twoMonthsInMonths,
+  yearInMonths,
 } from './data'
 
 export const ConfigSchema = z.object({
@@ -69,93 +68,93 @@ export const getPeriodUnit = (periodInterval: Interval) => {
   return PLURAL_INTERVAL[periodInterval]
 }
 
-export function convertDailyPeriodToInterval(
+export function convertMonthlyPeriodToInterval(
   interval: Interval,
-  periodInDays: number,
+  periodInMonths: number,
 ) {
-  let period = 0
+  let intervalInMonths = 0
 
   switch (interval) {
     case 'month':
-      period = periodInDays / monthInDays
+      intervalInMonths = monthInMonths
       break
     case 'two-months':
-      period = periodInDays / twoMonthsInDays
+      intervalInMonths = twoMonthsInMonths
       break
     case 'quarter':
-      period = periodInDays / quarterInDays
+      intervalInMonths = quarterInMonths
       break
     case 'half-year':
-      period = periodInDays / halfYearInDays
+      intervalInMonths = halfYearInMonths
       break
     case 'year':
-      period = periodInDays / yearInDays
-      break
-    default:
-      throw new Error('Intervalo invalido')
-  }
-
-  return Math.ceil(period)
-}
-
-export function convertContributionPerDay(
-  interval: Interval,
-  contribution: number,
-) {
-  let intervalInDays = 0
-
-  switch (interval) {
-    case 'month':
-      intervalInDays = monthInDays
-      break
-    case 'two-months':
-      intervalInDays = twoMonthsInDays
-      break
-    case 'quarter':
-      intervalInDays = quarterInDays
-      break
-    case 'half-year':
-      intervalInDays = halfYearInDays
-      break
-    case 'year':
-      intervalInDays = yearInDays
-      break
-    default:
-      throw new Error('Intervalo invalido')
-  }
-
-  return contribution / intervalInDays
-}
-
-export function convertFeeToDaily(interval: Interval, fee: number) {
-  let intervalInDays = 0
-
-  switch (interval) {
-    case 'month':
-      intervalInDays = monthInDays
-      break
-    case 'two-months':
-      intervalInDays = twoMonthsInDays
-      break
-    case 'quarter':
-      intervalInDays = quarterInDays
-      break
-    case 'half-year':
-      intervalInDays = halfYearInDays
-      break
-    case 'year':
-      intervalInDays = yearInDays
+      intervalInMonths = yearInMonths
       break
     default:
       throw new Error('Intervalo de período inválido')
   }
 
-  return Math.pow(1 + fee, 1 / intervalInDays) - 1
+  return Math.ceil(periodInMonths / intervalInMonths)
+}
+
+export function convertContributionToMonthly(
+  interval: Interval,
+  contribution: number,
+) {
+  let intervalInMonths = 0
+
+  switch (interval) {
+    case 'month':
+      intervalInMonths = monthInMonths
+      break
+    case 'two-months':
+      intervalInMonths = twoMonthsInMonths
+      break
+    case 'quarter':
+      intervalInMonths = quarterInMonths
+      break
+    case 'half-year':
+      intervalInMonths = halfYearInMonths
+      break
+    case 'year':
+      intervalInMonths = yearInMonths
+      break
+    default:
+      throw new Error('Intervalo de período inválido')
+  }
+
+  return contribution / intervalInMonths
+}
+
+export function convertFeeToMonthly(interval: Interval, fee: number) {
+  let intervalInMonths = 0
+
+  switch (interval) {
+    case 'month':
+      intervalInMonths = monthInMonths
+      break
+    case 'two-months':
+      intervalInMonths = twoMonthsInMonths
+      break
+    case 'quarter':
+      intervalInMonths = quarterInMonths
+      break
+    case 'half-year':
+      intervalInMonths = halfYearInMonths
+      break
+    case 'year':
+      intervalInMonths = yearInMonths
+      break
+    default:
+      throw new Error('Intervalo de período inválido')
+  }
+
+  return Math.pow(1 + fee, 1 / intervalInMonths) - 1
 }
 
 export function convertFeeToAnnual(interval: Interval, fee: number) {
-  const dailyFee = convertFeeToDaily(interval, fee)
-  return Math.pow(1 + dailyFee, yearInDays) - 1
+  const monthlyFee = convertFeeToMonthly(interval, fee)
+  return Math.pow(1 + monthlyFee, 12) - 1
 }
 
 export function getTaxByPeriod(days: number) {
@@ -170,24 +169,7 @@ export function getTaxByPeriod(days: number) {
   }
 }
 
-export function convertBusinessDaysToCalendarDays(
-  startDate: Date,
-  businessDays: number,
-) {
-  let calendarDays = 0
-  let count = 0
-
-  while (count < businessDays) {
-    calendarDays++
-    if (!isWeekend(addDays(startDate, calendarDays))) {
-      count++
-    }
-  }
-
-  return calendarDays
-}
-
-export function calcPeriodInBusinessDays({
+export function calcPeriodInMonths({
   futureValue,
   contribution,
   fee,
@@ -203,7 +185,7 @@ export function calcPeriodInBusinessDays({
   )
   const denominator = Math.log(1 + fee)
 
-  return Math.ceil(numerator / denominator)
+  return Number((numerator / denominator).toFixed(2))
 }
 
 export function calcGrossIncome({
@@ -224,49 +206,42 @@ export function calcGrossIncome({
   )
 }
 
-export function convertDaysToBusinessDays(days: number): number {
-  const endDate = addDays(new Date(), days)
-  const allDays = eachDayOfInterval({ start: new Date(), end: endDate })
-  const businessDays = allDays.filter((day) => !isWeekend(day))
-  return businessDays.length
-}
-
-export function convertIntervalToBusinessDays(interval: Interval) {
-  let intervalInDays
+export function convertIntervalToMonths(interval: Interval) {
+  let intervalInMonths = 0
 
   switch (interval) {
     case 'month':
-      intervalInDays = monthInDays
+      intervalInMonths = monthInMonths
       break
     case 'two-months':
-      intervalInDays = twoMonthsInDays
+      intervalInMonths = twoMonthsInMonths
       break
     case 'quarter':
-      intervalInDays = quarterInDays
+      intervalInMonths = quarterInMonths
       break
     case 'half-year':
-      intervalInDays = halfYearInDays
+      intervalInMonths = halfYearInMonths
       break
     case 'year':
-      intervalInDays = yearInDays
+      intervalInMonths = yearInMonths
       break
     default:
       throw new Error('Intervalo de período inválido')
   }
 
-  return intervalInDays
+  return intervalInMonths
 }
 
 export function calcCupomPayment(
   presentValue: number,
-  feeDaily: number,
-  cupomIntervalInDays: number,
+  monthlyFee: number,
+  cupomIntervalInMonths: number,
 ): number {
   let currentPeriod = 0
   let cupomPayment = presentValue
 
-  while (currentPeriod < cupomIntervalInDays) {
-    cupomPayment += cupomPayment * feeDaily
+  while (currentPeriod < cupomIntervalInMonths) {
+    cupomPayment += cupomPayment * monthlyFee
     currentPeriod++
   }
 
@@ -275,24 +250,19 @@ export function calcCupomPayment(
 
 export function calcCupomPaymentAmount(
   cupomPayment: number,
-  cupomIntervalInDays: number,
+  cupomIntervalInMonths: number,
   income: number,
   hasTax?: boolean,
 ) {
-  const cupomIntervalInBusinessDays =
-    convertDaysToBusinessDays(cupomIntervalInDays)
-
   let cupomAmountDiscounted = 0
   let cupomAmount = 0
   let count = 0
-  let periodInDays = 0
-  let periodInBusinessDays = 0
+  let periodInMonths = 0
 
   while (cupomAmountDiscounted < income) {
-    periodInDays += cupomIntervalInDays
-    periodInBusinessDays += cupomIntervalInBusinessDays
+    periodInMonths += cupomIntervalInMonths
 
-    const tax = hasTax ? getTaxByPeriod(periodInDays) : 0
+    const tax = hasTax ? getTaxByPeriod(periodInMonths * 30) : 0
 
     cupomAmountDiscounted += cupomPayment - cupomPayment * tax
     cupomAmount += cupomPayment
@@ -305,8 +275,7 @@ export function calcCupomPaymentAmount(
   return {
     cupomAmountDiscounted,
     cupomAmount,
-    periodInDays,
-    periodInBusinessDays,
+    periodInMonths,
     paymentAverage,
   }
 }

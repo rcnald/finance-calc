@@ -259,12 +259,13 @@ export function calcCupomPaymentAmount(
   let count = 0
   let periodInMonths = 0
 
-  while (cupomAmountDiscounted < income) {
+  while (cupomAmountDiscounted <= income) {
     periodInMonths += cupomIntervalInMonths
 
     const tax = hasTax ? getTaxByPeriod(periodInMonths * 30) : 0
 
     cupomAmountDiscounted += cupomPayment - cupomPayment * tax
+
     cupomAmount += cupomPayment
 
     count += 1
@@ -278,4 +279,9 @@ export function calcCupomPaymentAmount(
     periodInMonths,
     paymentAverage,
   }
+}
+
+export function sumFees(fee1: number, fee2: number) {
+  const result = (1 + fee1) * (1 + fee2) - 1
+  return result
 }

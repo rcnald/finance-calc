@@ -10,6 +10,7 @@ import {
   convertIntervalToMonths,
   convertMonthlyPeriodToInterval,
   getTaxByPeriod,
+  sumFees,
 } from '@/lib/utils'
 
 export interface GetPeriodBody {
@@ -62,9 +63,24 @@ export async function POST(request: Request) {
   const monthlyBenchmarkFee = benchmark
     ? convertFeeToMonthly('year', BENCHMARKS[benchmark])
     : 1
-  const monthlyFee = benchmark
-    ? fee * monthlyBenchmarkFee
-    : convertFeeToMonthly(periodInterval, fee)
+
+  let monthlyFee
+
+  switch (feeType) {
+    case 'indexed':
+      monthlyFee = sumFees(
+        convertFeeToMonthly(periodInterval, fee),
+        monthlyBenchmarkFee,
+      )
+      break
+    case 'pos':
+      monthlyFee = fee * monthlyBenchmarkFee
+      break
+    case 'pre':
+      monthlyFee = convertFeeToMonthly(periodInterval, fee)
+      break
+  }
+
   const monthlyContribution = convertContributionToMonthly(
     periodInterval,
     contribution,
@@ -120,8 +136,8 @@ export async function POST(request: Request) {
       annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
       realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
       feeType,
-      periodInDays: Math.floor(periodInMonths * 30),
-      periodInBusinessDays: Math.floor(periodInMonths * 21),
+      periodInDays: periodInMonths * 30,
+      periodInBusinessDays: periodInMonths * 21,
       periodInterval,
       cupomInterval: cupom,
       cupomPaymentAverage: Number(paymentAverage.toFixed(2)),

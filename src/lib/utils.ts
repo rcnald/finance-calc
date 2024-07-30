@@ -285,3 +285,10 @@ export function sumFees(fee1: number, fee2: number) {
   const result = (1 + fee1) * (1 + fee2) - 1
   return result
 }
+
+export function formatAsBRL(value: number) {
+  return Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
+}

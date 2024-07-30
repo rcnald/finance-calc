@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 
 import {
-  FeeIndexSchema,
+  FeeBenchmarkSchema,
   FeeTypeSchema,
   halfYearInMonths,
   INTERVAL,
@@ -20,7 +20,7 @@ import {
 
 export const ConfigSchema = z.object({
   fee_type: z.enum(FeeTypeSchema),
-  benchmark: z.enum(FeeIndexSchema).optional(),
+  benchmark: z.enum(FeeBenchmarkSchema).optional(),
   period_interval: z.enum(IntervalSchema),
   tax: z.boolean(),
   cupom: z.boolean(),

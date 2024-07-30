@@ -7,8 +7,8 @@ import { useQueryParams } from '@/hooks/useQueryParams'
 import {
   CalcMode,
   CalcModeSchema,
-  FeeIndex,
-  FeeIndexSchema,
+  FeeBenchmark,
+  FeeBenchmarkSchema,
   FeeType,
   FeeTypeSchema,
   Interval,
@@ -25,7 +25,7 @@ import {
 } from '../collapsible'
 import { Label } from '../label'
 import { Separator } from '../separator'
-import { FeeIndexSelect } from './fee-index-select'
+import { FeeBenchmarkSelect } from './fee-benchmark-select'
 import { FeeTypeSelect } from './fee-type-select'
 import { IntervalSelect } from './interval-select'
 
@@ -47,10 +47,10 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
     'pre',
     FeeTypeSchema,
   )
-  const [feeIndex, setFeeIndex] = useQueryParams<FeeIndex>(
+  const [feeIndex, setFeeIndex] = useQueryParams<FeeBenchmark>(
     'fee-index',
     'cdi',
-    FeeIndexSchema,
+    FeeBenchmarkSchema,
   )
   const [periodInterval, setPeriodInterval] = useQueryParams<Interval>(
     'period-interval',
@@ -131,11 +131,11 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
                     name="benchmark"
                     defaultValue={feeIndex}
                     render={({ field }) => (
-                      <FeeIndexSelect
+                      <FeeBenchmarkSelect
                         id="benchmark"
                         value={feeIndex}
                         onValueChange={(value) => {
-                          setFeeIndex(value as FeeIndex)
+                          setFeeIndex(value as FeeBenchmark)
                           field.onChange(value)
                         }}
                       />

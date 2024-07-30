@@ -60,6 +60,13 @@ export function FeeTypeSelect({
     ? (value as FeeType)
     : feeTypeValue
   const SelectedFeeIcon = FEE_TYPES_ICONS[actualValue]
+  const selectedType = FEE_TYPES[actualValue]
+
+  const Items = Object.entries(FEE_TYPES).map(([key, value]) => {
+    const icon = FEE_TYPES_ICONS[key as FeeType]
+
+    return { value: key as FeeType, placeholder: value, icon }
+  })
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
@@ -90,7 +97,7 @@ export function FeeTypeSelect({
         className="flex h-6 w-fit items-center justify-between gap-1 rounded-md border border-input bg-background px-2 py-0 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:flex [&>span]:items-center [&>span]:justify-center [&>span]:gap-1"
       >
         <SelectedFeeIcon aria-hidden={true} size={12} />
-        {FEE_TYPES[actualValue]}
+        {selectedType}
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
@@ -103,18 +110,16 @@ export function FeeTypeSelect({
           className="flex flex-col items-center justify-center gap-0"
           onValueChange={handleValueChange}
         >
-          {Object.entries(FEE_TYPES).map(([key, value]) => {
-            const Icon = FEE_TYPES_ICONS[key as FeeType]
-
+          {Items.map(({ value, placeholder, icon: Icon }) => {
             return (
               <FeeTypeSelectItem
-                key={key}
-                value={key}
+                key={value}
+                value={value}
                 onKeyUp={handleRadioItemKeyUp}
                 onClick={handleRadioItemClick}
               >
                 <Icon aria-hidden={true} size={28} />
-                <span className="font-normal">{value}</span>
+                <span className="font-normal">{placeholder}</span>
               </FeeTypeSelectItem>
             )
           })}
@@ -139,13 +144,11 @@ export function FeeTypeSelect({
         <SelectValue placeholder="Pré-fixada" className="flex" />
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(FEE_TYPES).map(([key, value]) => {
-          const Icon = FEE_TYPES_ICONS[key as FeeType]
-
+        {Items.map(({ value, placeholder, icon: Icon }) => {
           return (
-            <SelectItem key={key} value={key}>
+            <SelectItem key={value} value={value}>
               <SelectIcon icon={<Icon size={12} />} />
-              {value}
+              {placeholder}
             </SelectItem>
           )
         })}

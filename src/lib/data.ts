@@ -10,15 +10,15 @@ export type CalcMode = keyof typeof CALC_MODE
 
 export const CalcModeSchema = Object.keys(CALC_MODE) as [CalcMode]
 
-export const FEE_INDEX = {
+export const FEE_BENCHMARK = {
   cdi: 'CDI',
   ipca: 'IPCA',
   selic: 'SELIC',
 } as const
 
-export type FeeIndex = keyof typeof FEE_INDEX
+export type FeeBenchmark = keyof typeof FEE_BENCHMARK
 
-export const FeeIndexSchema = Object.keys(FEE_INDEX) as [FeeIndex]
+export const FeeBenchmarkSchema = Object.keys(FEE_BENCHMARK) as [FeeBenchmark]
 
 export const FEE_TYPES = {
   pre: 'Pré-fixado',

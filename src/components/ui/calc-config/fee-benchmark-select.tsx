@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { useMediaQuery } from 'usehooks-ts'
 
-import { FEE_INDEX, FeeIndex } from '@/lib/data'
+import { FEE_BENCHMARK, FeeBenchmark } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../button'
@@ -34,44 +34,52 @@ import {
   SelectValue,
 } from '../select'
 
-const FEE_INDEX_ICONS = {
+const FEE_BENCHMARK_ICONS: Record<FeeBenchmark, React.ElementType> = {
   cdi: TicketPercent,
   ipca: Activity,
   selic: BadgeDollarSign,
 } as const
 
-export interface FeeIndexSelectProps {
+export interface FeeBenchmarkSelectProps {
   value?: string
   onValueChange?: (value: string) => void
   id: string
 }
 
-export function FeeIndexSelect({
+export function FeeBenchmarkSelect({
   value,
   onValueChange,
   id,
-}: FeeIndexSelectProps) {
-  const [feeIndexValue, setFeeIndexValue] = useState<FeeIndex>('cdi')
-  const [isFeeIndexOpen, setIsFeeIndexOpen] = useState(false)
+}: FeeBenchmarkSelectProps) {
+  const [feeBenchmarkValue, setFeeBenchmarkValue] =
+    useState<FeeBenchmark>('cdi')
+  const [isFeeBenchmarkOpen, setIsFeeBenchmarkOpen] = useState(false)
 
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const actualValue = Object.keys(FEE_INDEX).includes(value ?? '')
-    ? (value as FeeIndex)
-    : feeIndexValue
-  const SelectedFeeIcon = FEE_INDEX_ICONS[actualValue]
+  const actualValue = Object.keys(FEE_BENCHMARK).includes(value ?? '')
+    ? (value as FeeBenchmark)
+    : feeBenchmarkValue
+  const SelectedFeeIcon = FEE_BENCHMARK_ICONS[actualValue]
+  const selectedBenchmark = FEE_BENCHMARK[actualValue]
+
+  const Items = Object.entries(FEE_BENCHMARK).map(([key, value]) => {
+    const icon = FEE_BENCHMARK_ICONS[key as FeeBenchmark]
+
+    return { value: key as FeeBenchmark, placeholder: value, icon }
+  })
 
   const handleValueChange = (value: string) => {
     if (onValueChange) {
-      onValueChange(value as FeeIndex)
+      onValueChange(value as FeeBenchmark)
     } else {
-      setFeeIndexValue(value as FeeIndex)
+      setFeeBenchmarkValue(value as FeeBenchmark)
     }
   }
 
   const handleRadioItemKeyUp: KeyboardEventHandler<HTMLButtonElement> = (e) => {
     if (e.key === 'Enter') {
-      setIsFeeIndexOpen(false)
+      setIsFeeBenchmarkOpen(false)
     }
   }
 
@@ -79,18 +87,18 @@ export function FeeIndexSelect({
     const isMouseEvent = !(e.screenX === 0 && e.screenY === 0)
 
     if (isMouseEvent) {
-      setIsFeeIndexOpen(false)
+      setIsFeeBenchmarkOpen(false)
     }
   }
 
   return !isDesktop ? (
-    <Drawer open={isFeeIndexOpen} onOpenChange={setIsFeeIndexOpen}>
+    <Drawer open={isFeeBenchmarkOpen} onOpenChange={setIsFeeBenchmarkOpen}>
       <DrawerTrigger
         id={id}
         className="flex h-6 w-fit items-center justify-between gap-1 rounded-md border border-input bg-background px-2 py-0 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:flex [&>span]:items-center [&>span]:justify-center [&>span]:gap-1"
       >
         <SelectedFeeIcon aria-hidden={true} size={12} />
-        {FEE_INDEX[actualValue]}
+        {selectedBenchmark}
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
@@ -103,19 +111,17 @@ export function FeeIndexSelect({
           className="flex flex-col items-center justify-center gap-0"
           onValueChange={handleValueChange}
         >
-          {Object.entries(FEE_INDEX).map(([key, value]) => {
-            const Icon = FEE_INDEX_ICONS[key as FeeIndex]
-
+          {Items.map(({ value, placeholder, icon: Icon }) => {
             return (
-              <FeeTypeSelectItem
-                key={key}
-                value={key}
+              <FeeBenchmarkSelectItem
+                key={value}
+                value={value}
                 onKeyUp={handleRadioItemKeyUp}
                 onClick={handleRadioItemClick}
               >
                 <Icon aria-hidden={true} size={28} />
-                <span className="font-normal">{value}</span>
-              </FeeTypeSelectItem>
+                <span className="font-normal">{placeholder}</span>
+              </FeeBenchmarkSelectItem>
             )
           })}
         </RadioGroup>
@@ -139,13 +145,11 @@ export function FeeIndexSelect({
         <SelectValue placeholder="CDI" className="flex" />
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(FEE_INDEX).map(([key, value]) => {
-          const Icon = FEE_INDEX_ICONS[key as FeeIndex]
-
+        {Items.map(({ value, placeholder, icon: Icon }) => {
           return (
-            <SelectItem key={key} value={key}>
+            <SelectItem key={value} value={value}>
               <SelectIcon icon={<Icon size={12} />} />
-              {value}
+              {placeholder}
             </SelectItem>
           )
         })}
@@ -154,18 +158,18 @@ export function FeeIndexSelect({
   )
 }
 
-interface FeeTypeSelectItemProps extends ComponentProps<'button'> {
+interface FeeBenchmarkSelectItemProps extends ComponentProps<'button'> {
   value: string
 }
 
-function FeeTypeSelectItem({
+function FeeBenchmarkSelectItem({
   onKeyUp,
   onClick,
   value,
   children,
   className,
   ...props
-}: FeeTypeSelectItemProps) {
+}: FeeBenchmarkSelectItemProps) {
   return (
     <div
       className={cn(

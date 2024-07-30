@@ -2,7 +2,12 @@ import { Info } from 'lucide-react'
 import { useMediaQuery } from 'usehooks-ts'
 
 import { useQueryParams } from '@/hooks/useQueryParams'
-import { FEE_INDEX, FeeIndex, FeeIndexSchema } from '@/lib/data'
+import {
+  BENCHMARKS,
+  FEE_BENCHMARK,
+  FeeBenchmark,
+  FeeBenchmarkSchema,
+} from '@/lib/data'
 
 import { Button } from '../button'
 import {
@@ -20,11 +25,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip'
 export function FeeInfoCard() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const [feeIndex] = useQueryParams<FeeIndex>(
+  const [feeIndex] = useQueryParams<FeeBenchmark>(
     'fee-index',
     'cdi',
-    FeeIndexSchema,
+    FeeBenchmarkSchema,
   )
+
+  const currentBenchmark = FEE_BENCHMARK[feeIndex]
+  const currentBenchmarkFee = BENCHMARKS[feeIndex] * 100
 
   return isDesktop ? (
     <Tooltip>
@@ -36,7 +44,8 @@ export function FeeInfoCard() {
       <TooltipContent>
         <p>
           Índice de referencia -{' '}
-          <span className="font-mono font-medium">{FEE_INDEX[feeIndex]}</span>
+          <span className="font-mono font-medium">{currentBenchmark}</span>
+          <span> - {currentBenchmarkFee}% a.a</span>
         </p>
       </TooltipContent>
     </Tooltip>
@@ -55,6 +64,7 @@ export function FeeInfoCard() {
           </DrawerDescription>
 
           <span className="mt-6 font-mono text-4xl font-medium">CDI</span>
+          <span> {currentBenchmarkFee}% a.a</span>
 
           <DrawerFooter>
             <DrawerClose>

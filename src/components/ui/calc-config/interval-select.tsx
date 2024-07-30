@@ -57,6 +57,12 @@ export function IntervalSelect({
     ? (value as Interval)
     : intervalValue
 
+  const selectedInterval = INTERVAL[actualValue]
+
+  const Items = Object.entries(INTERVAL).map(([key, value]) => {
+    return { value: key as Interval, placeholder: value }
+  })
+
   const handleValueChange = (value: string) => {
     if (onValueChange) {
       onValueChange(value as Interval)
@@ -88,7 +94,7 @@ export function IntervalSelect({
           className,
         )}
       >
-        {INTERVAL[actualValue]}
+        {selectedInterval}
         {children}
       </DrawerTrigger>
       <DrawerContent>
@@ -102,15 +108,15 @@ export function IntervalSelect({
           className="flex flex-col items-center justify-center gap-0"
           onValueChange={handleValueChange}
         >
-          {Object.entries(INTERVAL).map(([key, value]) => {
+          {Items.map(({ value, placeholder }) => {
             return (
               <IntervalSelectItem
-                key={key}
-                value={key}
+                key={value}
+                value={value}
                 onKeyUp={handleRadioItemKeyUp}
                 onClick={handleRadioItemClick}
               >
-                <span className="font-normal">{value}</span>
+                <span className="font-normal">{placeholder}</span>
               </IntervalSelectItem>
             )
           })}
@@ -136,10 +142,10 @@ export function IntervalSelect({
         {children}
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(INTERVAL).map(([key, value]) => {
+        {Items.map(({ value, placeholder }) => {
           return (
-            <SelectItem key={key} value={key}>
-              {value}
+            <SelectItem key={value} value={value}>
+              {placeholder}
             </SelectItem>
           )
         })}

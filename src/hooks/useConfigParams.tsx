@@ -1,6 +1,6 @@
 import {
-  FeeIndex,
-  FeeIndexSchema,
+  FeeBenchmark,
+  FeeBenchmarkSchema,
   FeeType,
   FeeTypeSchema,
   Interval,
@@ -15,10 +15,10 @@ export const useConfigParams = () => {
     'month',
     IntervalSchema,
   )
-  const [benchmark] = useQueryParams<FeeIndex>(
+  const [benchmark] = useQueryParams<FeeBenchmark>(
     'fee-index',
     'cdi',
-    FeeIndexSchema,
+    FeeBenchmarkSchema,
   )
   const [feeType] = useQueryParams<FeeType>('fee-type', 'pre', FeeTypeSchema)
   const [tax] = useQueryParams<boolean>('tax', false)

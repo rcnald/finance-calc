@@ -7,6 +7,7 @@ import { z } from 'zod'
 import type { GetPeriodBody, GetPeriodResponse } from '@/app/api/period/route'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
+import { FEE_BENCHMARK } from '@/lib/data'
 import {
   ConfigSchema,
   FieldSchema,
@@ -37,7 +38,7 @@ export function PeriodForm() {
   const { calcForm, fieldsState, CalcFormProvider } =
     useCalcForm<CalcPeriodSchema>(CalcPeriodSchema)
 
-  const { periodInterval, feeType, cupom } = useConfigParams()
+  const { periodInterval, feeType, cupom, benchmark } = useConfigParams()
 
   const {
     handleSubmit,
@@ -47,6 +48,8 @@ export function PeriodForm() {
 
   const feePeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()[0]
   const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
+  const currentBenchmark = FEE_BENCHMARK[benchmark]
+  const isFeeTypePre = feeType === 'pre'
 
   const handleCalcPeriod = async (periodFormData: CalcPeriodSchema) => {
     const payload: GetPeriodBody = {
@@ -119,7 +122,7 @@ export function PeriodForm() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="fee">Qual a taxa do seu investimento?</Label>
-          {feeType !== 'pre' ? <FeeInfoCard /> : null}
+          {isFeeTypePre ? null : <FeeInfoCard />}
         </div>
         <Input
           id="fee"
@@ -129,7 +132,9 @@ export function PeriodForm() {
           {...register('fee')}
           onChange={handleCurrencyInputChange}
         >
-          <InputUnit className="px-3">% a.{feePeriodUnit}</InputUnit>
+          <InputUnit className="px-3">
+            % {isFeeTypePre ? `a.${feePeriodUnit}` : `do ${currentBenchmark}`}
+          </InputUnit>
         </Input>
         <Label
           htmlFor="fee"
@@ -166,13 +171,15 @@ export function PeriodForm() {
         </div>
       ) : null}
 
-      <Button className="w-full">Calcular</Button>
+      <Button className="w-full" disabled={isSubmitting}>
+        Calcular
+      </Button>
 
       <Box className="flex flex-col items-center justify-center">
         <h2 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
           Você precisará de
         </h2>
-        <strong className="font-mono text-5xl text-slate-700">
+        <strong className="font-mono text-slate-700">
           <pre>
             {isSubmitting ? 'carregando' : JSON.stringify(periodData, null, 2)}
           </pre>

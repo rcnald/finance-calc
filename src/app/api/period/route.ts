@@ -1,4 +1,4 @@
-import { BENCHMARKS, FeeIndex, FeeType, Interval } from '@/lib/data'
+import { BENCHMARKS, FeeBenchmark, FeeType, Interval } from '@/lib/data'
 import {
   calcCupomPayment,
   calcCupomPaymentAmount,
@@ -20,7 +20,7 @@ export interface GetPeriodBody {
   contribution?: number
   period_interval: Interval
   fee_type: FeeType
-  benchmark?: FeeIndex
+  benchmark?: FeeBenchmark
   tax?: boolean
   cupom?: Interval
 }
@@ -40,7 +40,7 @@ export interface GetPeriodResponse {
   income: number
   discountedIncome?: number
   tax?: number
-  benchmark?: FeeIndex
+  benchmark?: FeeBenchmark
   feeType: FeeType
   annualIncomeFee: number
   realAnnualIncomeFee: number
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     income = cupomAmount
     discountedIncome = cupomAmountDiscounted
     futureValueGross = cupomAmount + presentValue
-    annualIncomeFee = convertFeeToAnnual(periodInterval, fee)
+    annualIncomeFee = convertFeeToAnnual('month', monthlyBenchmarkFee)
     realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
     realIncome = cupomAmountDiscounted / (1 + BENCHMARKS.ipca)
 
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
   investedAmount = presentValue + period * contribution
   discountedIncome = income - income * (isTax ? tax : 0)
   futureValueGross = investedAmount + income
-  annualIncomeFee = convertFeeToAnnual(periodInterval, fee)
+  annualIncomeFee = convertFeeToAnnual('month', monthlyBenchmarkFee) // aki
   realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
   realIncome = discountedIncome / (1 + BENCHMARKS.ipca)
 

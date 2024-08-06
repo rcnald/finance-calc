@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     income = cupomAmount
     discountedIncome = cupomAmountDiscounted
     futureValueGross = cupomAmount + presentValue
-    annualIncomeFee = convertFeeToAnnual('month', monthlyBenchmarkFee)
+    annualIncomeFee = convertFeeToAnnual('month', monthlyFee)
     realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
     realIncome = cupomAmountDiscounted / (1 + BENCHMARKS.ipca)
 
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
   investedAmount = presentValue + period * contribution
   discountedIncome = income - income * (isTax ? tax : 0)
   futureValueGross = investedAmount + income
-  annualIncomeFee = convertFeeToAnnual('month', monthlyBenchmarkFee) // aki
+  annualIncomeFee = convertFeeToAnnual('month', monthlyFee)
   realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
   realIncome = discountedIncome / (1 + BENCHMARKS.ipca)
 

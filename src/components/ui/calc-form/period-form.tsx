@@ -2,21 +2,10 @@
 
 import axios from 'axios'
 import { useState } from 'react'
-import {
-  Label as ChartLabel,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from 'recharts'
+import { Label as L, Pie, PieChart } from 'recharts'
 import { z } from 'zod'
 
 import type { GetPeriodBody, GetPeriodResponse } from '@/app/api/period/route'
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
 import { FEE_BENCHMARK, PLURAL_INTERVAL } from '@/lib/data'
@@ -25,12 +14,21 @@ import {
   convertMonthlyPeriodToInterval,
   FieldSchema,
   formatAsBRL,
+  formatCompact,
   getPeriod,
   handleCurrencyInputChange,
 } from '@/lib/utils'
 
 import { Box } from '../box'
 import { Button } from '../button'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '../chart'
 import { Input, InputUnit } from '../input'
 import { Label } from '../label'
 import {
@@ -70,8 +68,10 @@ export function PeriodForm() {
 
   const feePeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()[0]
   const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
+  const periodUnit = PLURAL_INTERVAL[periodInterval]
   const currentBenchmark = FEE_BENCHMARK[benchmark]
   const isFeeTypePre = feeType === 'pre'
+  const feeUnit = isFeeTypePre ? `a.${feePeriodUnit}` : `do ${currentBenchmark}`
 
   const handleCalcPeriod = async (periodFormData: CalcPeriodSchema) => {
     const payload: GetPeriodBody = {
@@ -96,24 +96,31 @@ export function PeriodForm() {
 
   const chartData = [
     {
-      investedValue: periodData?.investedAmount ?? 0,
-      incomeValue: periodData?.discountedIncome ?? periodData?.income,
-      tax:
+      name: 'invested',
+      amount: periodData?.investedAmount ?? 0,
+      fill: 'var(--color-invested)',
+    },
+    {
+      name: 'income',
+      amount: periodData?.discountedIncome ?? periodData?.income ?? 0,
+      fill: 'var(--color-income)',
+    },
+    {
+      name: 'tax',
+      amount:
         periodData && periodData.discountedIncome
           ? periodData?.income - periodData.discountedIncome
           : 0,
+      fill: 'var(--color-tax)',
     },
   ]
 
   const chartConfig = {
-    investment: {
-      label: 'Investimento',
-    },
-    investedValue: {
+    invested: {
       label: 'Valor investido',
       color: 'hsl(var(--chart-1))',
     },
-    incomeValue: {
+    income: {
       label: 'Rendimento',
       color: 'hsl(var(--chart-2))',
     },
@@ -122,6 +129,39 @@ export function PeriodForm() {
       color: 'hsl(var(--chart-3))',
     },
   } satisfies ChartConfig
+
+  const presentValue = formatAsBRL(periodData?.presentValue ?? 0)
+  const futureValueGross = formatAsBRL(periodData?.futureValueGross ?? 0)
+  const futureValue = formatAsBRL(periodData?.futureValue ?? 0)
+  const annualFee = (periodData ? periodData.annualIncomeFee * 100 : 0).toFixed(
+    2,
+  )
+  const annualRealFee = periodData ? periodData?.realAnnualIncomeFee * 100 : 0
+  const periodInDays = periodData ? periodData?.periodInDays : 0
+  const periodInBusinessDays = periodData ? periodData?.periodInBusinessDays : 0
+  const investedAmount = formatAsBRL(periodData?.investedAmount ?? 0)
+  const income = formatAsBRL(periodData?.income ?? 0)
+  const taxAmount = formatAsBRL(
+    chartData.find((data) => data.name === 'tax')?.amount ?? 0,
+  )
+  const tax = (periodData?.tax ?? 0) * 100
+  const discountedIncome = formatAsBRL(periodData?.discountedIncome ?? 0)
+  const realIncome = formatAsBRL(periodData?.realIncome ?? 0)
+  const cupomPaymentAverage = formatAsBRL(periodData?.cupomPaymentAverage ?? 0)
+  const period = periodData
+    ? convertMonthlyPeriodToInterval(
+        periodData.periodInterval,
+        periodData.periodInDays / 30,
+      )
+    : 0
+  const investmentAmount = formatCompact.format(
+    chartData.reduce((accumulatorAmount, currentAmount) => {
+      if (currentAmount.name !== 'tax') {
+        return (accumulatorAmount += currentAmount.amount)
+      }
+      return accumulatorAmount
+    }, 0),
+  )
 
   return (
     <div className="flex w-[500px] flex-col gap-4">
@@ -184,9 +224,7 @@ export function PeriodForm() {
             {...register('fee')}
             onChange={handleCurrencyInputChange}
           >
-            <InputUnit className="px-3">
-              % {isFeeTypePre ? `a.${feePeriodUnit}` : `do ${currentBenchmark}`}
-            </InputUnit>
+            <InputUnit className="px-3">% {feeUnit}</InputUnit>
           </Input>
           <Label
             htmlFor="fee"
@@ -232,80 +270,66 @@ export function PeriodForm() {
             Você precisará de
           </h2>
           <strong className="font-mono text-5xl text-slate-700">
-            {periodData
-              ? convertMonthlyPeriodToInterval(
-                  periodData.periodInterval,
-                  periodData.periodInDays / 30,
-                )
-              : 0}
+            {period}
           </strong>
-          <span className="text-muted-foreground">
-            {PLURAL_INTERVAL[periodInterval]}
-          </span>
+          <span className="text-muted-foreground">{periodUnit}</span>
         </Box>
       </CalcFormProvider>
 
       <div className="flex basis-1/2 flex-col">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[250px]"
+          className="mx-auto aspect-square max-h-[250px] min-w-[400px]"
         >
-          <RadialBarChart data={chartData} innerRadius={80} outerRadius={130}>
+          <PieChart>
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent labelKey="investment" />}
+              content={<ChartTooltipContent hideLabel />}
             />
-
-            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-              <ChartLabel
+            <Pie
+              data={chartData}
+              dataKey="amount"
+              nameKey="name"
+              innerRadius={60}
+              strokeWidth={5}
+            >
+              <L
                 content={({ viewBox }) => {
                   if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
-                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
                           className="fill-foreground text-2xl font-bold"
                         >
-                          {periodData?.futureValue ?? 0}
+                          {investmentAmount.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 13}
+                          y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          R$
+                          Reais
                         </tspan>
                       </text>
                     )
                   }
                 }}
               />
-            </PolarRadiusAxis>
-
-            <RadialBar
-              dataKey="investedValue"
-              stackId="a"
-              cornerRadius={5}
-              fill="var(--color-investedValue)"
-              className="stroke-transparent stroke-2"
+            </Pie>
+            <ChartLegend
+              content={<ChartLegendContent nameKey="name" />}
+              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center [&>*]:whitespace-nowrap"
             />
-            <RadialBar
-              dataKey="incomeValue"
-              fill="var(--color-incomeValue)"
-              stackId="a"
-              cornerRadius={5}
-              className="stroke-transparent stroke-2"
-            />
-            <RadialBar
-              dataKey="tax"
-              fill="var(--color-tax)"
-              stackId="a"
-              cornerRadius={5}
-              className="stroke-transparent stroke-2"
-            />
-          </RadialBarChart>
+          </PieChart>
         </ChartContainer>
+
         <Table className="flex border">
           <TableHeader className="border-r [&_th]:border-b [&_th]:font-bold [&_tr]:border-b-0">
             <TableRow className="flex flex-col">
@@ -355,46 +379,23 @@ export function PeriodForm() {
           </TableHeader>
           <TableBody className="w-full">
             <TableRow className="flex flex-col [&_td]:border-b [&_td]:text-end">
-              <TableCell>
-                {formatAsBRL(periodData?.presentValue ?? 0)}
-              </TableCell>
-              <TableCell className="h-[80px]">
-                {formatAsBRL(periodData?.futureValueGross ?? 0)}
-              </TableCell>
-              <TableCell>{formatAsBRL(periodData?.futureValue ?? 0)}</TableCell>
-              <TableCell>
-                {periodData ? periodData?.annualIncomeFee * 100 : 0}%
-              </TableCell>
-              <TableCell>
-                {periodData ? periodData?.realAnnualIncomeFee * 100 : 0}%
-              </TableCell>
-              <TableCell>{periodData ? periodData?.periodInDays : 0}</TableCell>
-              <TableCell className="h-[80px]">
-                {periodData ? periodData?.periodInBusinessDays : 0}
-              </TableCell>
-              <TableCell>
-                {formatAsBRL(periodData?.investedAmount ?? 0)}
-              </TableCell>
-              <TableCell className="h-[80px]">
-                {formatAsBRL(periodData?.income ?? 0)}
-              </TableCell>
-              <TableCell className="h-[80px]">
-                {formatAsBRL(chartData[0].tax)}
-              </TableCell>
-              <TableCell>{(periodData?.tax ?? 0) * 100}%</TableCell>
-              <TableCell className="h-[80px]">
-                {formatAsBRL(periodData?.discountedIncome ?? 0)}
-              </TableCell>
-              <TableCell>{formatAsBRL(periodData?.realIncome ?? 0)}</TableCell>
-              <TableCell className="h-[80px]">
-                {formatAsBRL(periodData?.cupomPaymentAverage ?? 0)}
-              </TableCell>
+              <TableCell>{presentValue}</TableCell>
+              <TableCell className="h-[80px]">{futureValueGross}</TableCell>
+              <TableCell>{futureValue}</TableCell>
+              <TableCell>{annualFee}%</TableCell>
+              <TableCell>{annualRealFee}%</TableCell>
+              <TableCell>{periodInDays}</TableCell>
+              <TableCell className="h-[80px]">{periodInBusinessDays}</TableCell>
+              <TableCell>{investedAmount}</TableCell>
+              <TableCell className="h-[80px]">{income}</TableCell>
+              <TableCell className="h-[80px]">{taxAmount}</TableCell>
+              <TableCell>{tax}%</TableCell>
+              <TableCell className="h-[80px]">{discountedIncome}</TableCell>
+              <TableCell>{realIncome}</TableCell>
+              <TableCell className="h-[80px]">{cupomPaymentAverage}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        {/* <pre>
-        {isSubmitting ? 'carregando' : JSON.stringify(periodData, null, 2)}
-      </pre> */}
       </div>
     </div>
   )

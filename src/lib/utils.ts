@@ -292,3 +292,8 @@ export function formatAsBRL(value: number) {
     currency: 'BRL',
   }).format(value)
 }
+
+export const formatCompact = Intl.NumberFormat('pt-BR', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})

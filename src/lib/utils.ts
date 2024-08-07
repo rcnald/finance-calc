@@ -97,6 +97,35 @@ export function convertMonthlyPeriodToInterval(
   return Math.ceil(periodInMonths / intervalInMonths)
 }
 
+export function convertIntervalPeriodToMonths(
+  interval: Interval,
+  period: number,
+) {
+  let intervalInMonths = 0
+
+  switch (interval) {
+    case 'month':
+      intervalInMonths = monthInMonths
+      break
+    case 'two-months':
+      intervalInMonths = twoMonthsInMonths
+      break
+    case 'quarter':
+      intervalInMonths = quarterInMonths
+      break
+    case 'half-year':
+      intervalInMonths = halfYearInMonths
+      break
+    case 'year':
+      intervalInMonths = yearInMonths
+      break
+    default:
+      throw new Error('Intervalo de período inválido')
+  }
+
+  return Math.ceil(period * intervalInMonths)
+}
+
 export function convertContributionToMonthly(
   interval: Interval,
   contribution: number,
@@ -150,6 +179,32 @@ export function convertFeeToMonthly(interval: Interval, fee: number) {
   }
 
   return Math.pow(1 + fee, 1 / intervalInMonths) - 1
+}
+
+export function monthlyFeeToInterval(interval: Interval, monthlyFee: number) {
+  let intervalInMonths = 0
+
+  switch (interval) {
+    case 'month':
+      intervalInMonths = monthInMonths
+      break
+    case 'two-months':
+      intervalInMonths = twoMonthsInMonths
+      break
+    case 'quarter':
+      intervalInMonths = quarterInMonths
+      break
+    case 'half-year':
+      intervalInMonths = halfYearInMonths
+      break
+    case 'year':
+      intervalInMonths = yearInMonths
+      break
+    default:
+      throw new Error('Intervalo de período inválido')
+  }
+
+  return Math.pow(1 + monthlyFee, intervalInMonths) - 1
 }
 
 export function convertFeeToAnnual(interval: Interval, fee: number) {
@@ -297,3 +352,71 @@ export const formatCompact = Intl.NumberFormat('pt-BR', {
   notation: 'compact',
   maximumFractionDigits: 1,
 })
+
+function calculateFutureValue(
+  fee: number,
+  presentValue: number,
+  monthlyContribution: number,
+  periodInMonths: number,
+): number {
+  let futureValue = presentValue * Math.pow(1 + fee, periodInMonths)
+
+  for (let i = 1; i <= periodInMonths; i++) {
+    futureValue += monthlyContribution * Math.pow(1 + fee, periodInMonths - i)
+  }
+
+  return futureValue
+}
+
+export function calculateRate(
+  presentValue: number,
+  futureValue: number,
+  contribution: number,
+  period: number,
+
+  tax?: number,
+) {
+  let fee = 0.01
+  const tolerance = 1e-10
+  const maxIterations = 1000
+  let iterations = 0
+
+  const income = calcGrossIncome({
+    futureValue,
+    contribution,
+    period,
+    presentValue,
+    tax,
+  })
+
+  const futureValueGross = income + contribution * period + presentValue
+
+  while (iterations < maxIterations) {
+    const possibleFutureValue = calculateFutureValue(
+      fee,
+      presentValue,
+      contribution,
+      period,
+    )
+
+    const futureValueDerivative =
+      presentValue * period * Math.pow(1 + fee, period - 1) +
+      contribution *
+        ((period * Math.pow(1 + fee, period - 1) * fee -
+          (Math.pow(1 + fee, period) - 1)) /
+          Math.pow(fee, 2))
+
+    const possibleFee =
+      fee - (possibleFutureValue - futureValueGross) / futureValueDerivative
+
+    if (Math.abs(possibleFee - fee) < tolerance) {
+      fee = possibleFee
+      break
+    }
+
+    fee = possibleFee
+    iterations++
+  }
+
+  return fee
+}

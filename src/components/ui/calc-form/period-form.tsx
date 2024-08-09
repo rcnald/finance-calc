@@ -136,7 +136,9 @@ export function PeriodForm() {
   const annualFee = (periodData ? periodData.annualIncomeFee * 100 : 0).toFixed(
     2,
   )
-  const annualRealFee = periodData ? periodData?.realAnnualIncomeFee * 100 : 0
+  const annualRealFee = (
+    periodData ? periodData?.realAnnualIncomeFee * 100 : 0
+  ).toFixed(2)
   const periodInDays = periodData ? periodData?.periodInDays : 0
   const periodInBusinessDays = periodData ? periodData?.periodInBusinessDays : 0
   const investedAmount = formatAsBRL(periodData?.investedAmount ?? 0)

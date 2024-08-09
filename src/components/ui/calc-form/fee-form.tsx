@@ -1,7 +1,9 @@
 'use client'
 
+import axios from 'axios'
 import { z } from 'zod'
 
+import { GetFeeBody } from '@/app/api/fee/route'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
 import {
@@ -39,13 +41,25 @@ export function FeeForm() {
   const periodUnit = getPeriodUnit(periodInterval)
   const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
 
-  const handleCalcPeriod = (data: CalcFeeSchema) => {
+  const handleCalcFee = async (feeFormData: CalcFeeSchema) => {
+    const payload: GetFeeBody = {
+      present_value: feeFormData.present_value,
+      future_value: feeFormData.future_value,
+      contribution: feeFormData.contribution,
+      period: feeFormData.period,
+      period_interval: feeFormData.period_interval,
+    }
+
+    if (feeFormData.tax) payload.tax = feeFormData.tax
+
+    const { data } = await axios.post('/api/fee', payload)
+
     console.log(data)
   }
 
   return (
     <CalcFormProvider
-      onSubmit={handleSubmit(handleCalcPeriod)}
+      onSubmit={handleSubmit(handleCalcFee)}
       className="flex flex-col gap-4"
     >
       <div className="flex flex-col gap-2">

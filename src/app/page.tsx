@@ -37,7 +37,7 @@ export default function Page() {
               defaultValue={currentTab}
               value={currentTab}
               onValueChange={(value) => setCurrentTab(value as CalcMode)}
-              className="flex flex-col items-center"
+              className="flex w-[500px] flex-col items-center gap-4"
             >
               <TabsList>
                 {Object.entries(CALC_MODE).map(([key, value]) => {

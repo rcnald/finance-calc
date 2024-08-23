@@ -3,8 +3,13 @@ import { ChangeEventHandler } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 
+import { ChartConfig } from '@/components/ui/chart'
+
 import {
+  FEE_BENCHMARK,
+  FeeBenchmark,
   FeeBenchmarkSchema,
+  FeeType,
   FeeTypeSchema,
   halfYearInMonths,
   INTERVAL,
@@ -17,6 +22,21 @@ import {
   twoMonthsInMonths,
   yearInMonths,
 } from './data'
+
+export interface OutputResponse {
+  presentValue: number
+  futureValue: number
+  futureValueGross: number
+  annualIncomeFee: number
+  realAnnualIncomeFee: number
+  periodInDays: number
+  periodInBusinessDays: number
+  investedAmount: number
+  income: number
+  tax: number
+  discountedIncome: number
+  realIncome: number
+}
 
 export const ConfigSchema = z.object({
   fee_type: z.enum(FeeTypeSchema),
@@ -419,4 +439,131 @@ export function calculateRate(
   }
 
   return fee
+}
+
+export function formatOutputValues<T extends OutputResponse | undefined>({
+  data,
+}: {
+  data: T
+}) {
+  const presentValue = formatAsBRL(data?.presentValue ?? 0)
+  const futureValueGross = formatAsBRL(data?.futureValueGross ?? 0)
+  const futureValue = formatAsBRL(data?.futureValue ?? 0)
+  const annualFee = (data ? data.annualIncomeFee * 100 : 0).toFixed(2)
+  const annualRealFee = (data ? data?.realAnnualIncomeFee * 100 : 0).toFixed(2)
+  const periodInDays = data ? data?.periodInDays : 0
+  const periodInBusinessDays = data ? data?.periodInBusinessDays : 0
+  const investedAmount = formatAsBRL(data?.investedAmount ?? 0)
+  const income = formatAsBRL(data?.income ?? 0)
+
+  const tax = (data?.tax ?? 0) * 100
+  const discountedIncome = formatAsBRL(data?.discountedIncome ?? 0)
+  const realIncome = formatAsBRL(data?.realIncome ?? 0)
+
+  const { chartData } = getChartData({
+    discountedIncome: data?.discountedIncome,
+    income: data?.income ?? 0,
+    investedAmount: data?.investedAmount ?? 0,
+  })
+
+  const taxAmount = formatAsBRL(
+    chartData.find((chart) => chart.name === 'tax')?.amount ?? 0,
+  )
+
+  const investmentAmount = formatCompact.format(
+    chartData.reduce((accumulatorAmount, currentAmount) => {
+      if (currentAmount.name !== 'tax') {
+        return (accumulatorAmount += currentAmount.amount)
+      }
+      return accumulatorAmount
+    }, 0),
+  )
+
+  return {
+    presentValue,
+    futureValueGross,
+    futureValue,
+    annualFee,
+    annualRealFee,
+    periodInDays,
+    periodInBusinessDays,
+    investedAmount,
+    income,
+    tax,
+    discountedIncome,
+    realIncome,
+    taxAmount,
+    investmentAmount,
+  }
+}
+
+export function getChartData({
+  investedAmount,
+  discountedIncome,
+  income,
+}: {
+  investedAmount: number
+  discountedIncome?: number
+  income: number
+}) {
+  const chartData = [
+    {
+      name: 'invested',
+      amount: investedAmount,
+      fill: 'var(--color-invested)',
+    },
+    {
+      name: 'income',
+      amount: discountedIncome ?? income ?? 0,
+      fill: 'var(--color-income)',
+    },
+    {
+      name: 'tax',
+      amount: discountedIncome ? income - discountedIncome : 0,
+      fill: 'var(--color-tax)',
+    },
+  ]
+
+  const chartConfig = {
+    invested: {
+      label: 'Valor investido',
+      color: 'hsl(var(--chart-1))',
+    },
+    income: {
+      label: 'Rendimento',
+      color: 'hsl(var(--chart-2))',
+    },
+    tax: {
+      label: 'Impostos',
+      color: 'hsl(var(--chart-3))',
+    },
+  } satisfies ChartConfig
+
+  return { chartData, chartConfig }
+}
+
+export function generateFieldsUnits({
+  periodInterval,
+  benchmark,
+  feeType,
+}: {
+  periodInterval: Interval
+  benchmark?: FeeBenchmark
+  feeType?: FeeType
+}) {
+  const feePeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()[0]
+  const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
+  const periodUnit = PLURAL_INTERVAL[periodInterval]
+  const currentBenchmark = benchmark ? FEE_BENCHMARK[benchmark] : undefined
+  const isFeeTypePre = feeType === 'pre'
+  const feeUnit = isFeeTypePre ? `a.${feePeriodUnit}` : `do ${currentBenchmark}`
+
+  return {
+    feePeriodUnit,
+    contributionPeriodUnit,
+    periodUnit,
+    feeUnit,
+    currentBenchmark,
+    isFeeTypePre,
+  }
 }

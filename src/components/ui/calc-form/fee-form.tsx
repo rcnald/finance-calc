@@ -13,10 +13,14 @@ import {
   FieldSchema,
   formatAsBRL,
   formatCompact,
+  formatOutputValues,
+  generateFieldsUnits,
+  getChartData,
   getPeriod,
   getPeriodUnit,
   handleCurrencyInputChange,
   handleDigitsInputChange,
+  OutputResponse,
 } from '@/lib/utils'
 
 import { Box } from '../box'
@@ -51,8 +55,10 @@ const CalcFeeSchema = ConfigSchema.extend({
 
 type CalcFeeSchema = z.infer<typeof CalcFeeSchema>
 
+type FeeResponse = OutputResponse & GetFeeResponse
+
 export function FeeForm() {
-  const [feeData, setFeeData] = useState<GetFeeResponse>()
+  const [feeData, setFeeData] = useState<FeeResponse>()
   const { calcForm, fieldsState, CalcFormProvider } =
     useCalcForm<CalcFeeSchema>(CalcFeeSchema)
 
@@ -60,8 +66,9 @@ export function FeeForm() {
 
   const { handleSubmit, register } = calcForm
 
-  const periodUnit = getPeriodUnit(periodInterval)
-  const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
+  const { contributionPeriodUnit, periodUnit } = generateFieldsUnits({
+    periodInterval,
+  })
 
   const handleCalcFee = async (feeFormData: CalcFeeSchema) => {
     const payload: GetFeeBody = {
@@ -79,41 +86,30 @@ export function FeeForm() {
     setFeeData(data)
   }
 
-  const chartData = [
-    {
-      name: 'invested',
-      amount: feeData?.investedAmount ?? 0,
-      fill: 'var(--color-invested)',
-    },
-    {
-      name: 'income',
-      amount: feeData?.discountedIncome ?? feeData?.income ?? 0,
-      fill: 'var(--color-income)',
-    },
-    {
-      name: 'tax',
-      amount:
-        feeData && feeData.discountedIncome
-          ? feeData?.income - feeData.discountedIncome
-          : 0,
-      fill: 'var(--color-tax)',
-    },
-  ]
+  const { chartConfig, chartData } = getChartData({
+    income: feeData?.income ?? 0,
+    investedAmount: feeData?.investedAmount ?? 0,
+    discountedIncome: feeData?.discountedIncome,
+  })
 
-  const chartConfig = {
-    invested: {
-      label: 'Valor investido',
-      color: 'hsl(var(--chart-1))',
-    },
-    income: {
-      label: 'Rendimento',
-      color: 'hsl(var(--chart-2))',
-    },
-    tax: {
-      label: 'Impostos',
-      color: 'hsl(var(--chart-3))',
-    },
-  } satisfies ChartConfig
+  const {
+    annualFee,
+    annualRealFee,
+    discountedIncome,
+    futureValue,
+    futureValueGross,
+    income,
+    investedAmount,
+    periodInBusinessDays,
+    periodInDays,
+    presentValue,
+    realIncome,
+    tax,
+    investmentAmount,
+    taxAmount,
+  } = formatOutputValues<FeeResponse | undefined>({
+    data: feeData,
+  })
 
   const presentValue = formatAsBRL(feeData?.presentValue ?? 0)
   const futureValueGross = formatAsBRL(feeData?.futureValueGross ?? 0)
@@ -145,7 +141,7 @@ export function FeeForm() {
   )
 
   return (
-    <div className="flex w-[500px] flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <CalcFormProvider
         onSubmit={handleSubmit(handleCalcFee)}
         className="flex flex-col gap-4"

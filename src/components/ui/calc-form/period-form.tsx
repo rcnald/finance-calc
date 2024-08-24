@@ -1,28 +1,28 @@
 'use client'
 
-import axios from 'axios'
 import { useState } from 'react'
 import { Label as L, Pie, PieChart } from 'recharts'
 import { z } from 'zod'
 
-import type { GetPeriodBody, GetPeriodResponse } from '@/app/api/period/route'
+import { getPeriod } from '@/api/getPeriod'
+import type { GetPeriodResponse } from '@/app/api/period/route'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
-import { FEE_BENCHMARK, PLURAL_INTERVAL } from '@/lib/data'
 import {
   ConfigSchema,
   convertMonthlyPeriodToInterval,
   FieldSchema,
   formatAsBRL,
-  formatCompact,
-  getPeriod,
+  formatOutputValues,
+  generateFieldsUnits,
+  getChartData,
   handleCurrencyInputChange,
+  OutputResponse,
 } from '@/lib/utils'
 
 import { Box } from '../box'
 import { Button } from '../button'
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -53,8 +53,10 @@ const CalcPeriodSchema = ConfigSchema.extend({
 
 export type CalcPeriodSchema = z.infer<typeof CalcPeriodSchema>
 
+type PeriodResponse = OutputResponse & GetPeriodResponse
+
 export function PeriodForm() {
-  const [periodData, setPeriodData] = useState<GetPeriodResponse>()
+  const [periodData, setPeriodData] = useState<PeriodResponse>()
   const { calcForm, fieldsState, CalcFormProvider } =
     useCalcForm<CalcPeriodSchema>(CalcPeriodSchema)
 
@@ -66,89 +68,41 @@ export function PeriodForm() {
     formState: { isSubmitting },
   } = calcForm
 
-  const feePeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()[0]
-  const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
-  const periodUnit = PLURAL_INTERVAL[periodInterval]
-  const currentBenchmark = FEE_BENCHMARK[benchmark]
-  const isFeeTypePre = feeType === 'pre'
-  const feeUnit = isFeeTypePre ? `a.${feePeriodUnit}` : `do ${currentBenchmark}`
+  const { contributionPeriodUnit, feeUnit, isFeeTypePre, periodUnit } =
+    generateFieldsUnits({ benchmark, feeType, periodInterval })
 
   const handleCalcPeriod = async (periodFormData: CalcPeriodSchema) => {
-    const payload: GetPeriodBody = {
-      present_value: periodFormData.present_value,
-      future_value: periodFormData.future_value,
-      fee: periodFormData.fee,
-      contribution: periodFormData.contribution,
-      period_interval: periodFormData.period_interval,
-      fee_type: periodFormData.fee_type,
-    }
+    const { data: periodResponse } =
+      await getPeriod<PeriodResponse>(periodFormData)
 
-    if (periodFormData.fee_type !== 'pre') {
-      payload.benchmark = periodFormData.benchmark
-    }
-    if (periodFormData.tax) payload.tax = periodFormData.tax
-    if (periodFormData.cupom) payload.cupom = periodFormData.cupom_interval
-
-    const { data } = await axios.post<GetPeriodResponse>('/api/period', payload)
-
-    setPeriodData(data)
+    setPeriodData(periodResponse)
   }
 
-  const chartData = [
-    {
-      name: 'invested',
-      amount: periodData?.investedAmount ?? 0,
-      fill: 'var(--color-invested)',
-    },
-    {
-      name: 'income',
-      amount: periodData?.discountedIncome ?? periodData?.income ?? 0,
-      fill: 'var(--color-income)',
-    },
-    {
-      name: 'tax',
-      amount:
-        periodData && periodData.discountedIncome
-          ? periodData?.income - periodData.discountedIncome
-          : 0,
-      fill: 'var(--color-tax)',
-    },
-  ]
+  const { chartConfig, chartData } = getChartData({
+    discountedIncome: periodData?.discountedIncome,
+    income: periodData?.income ?? 0,
+    investedAmount: periodData?.investedAmount ?? 0,
+  })
 
-  const chartConfig = {
-    invested: {
-      label: 'Valor investido',
-      color: 'hsl(var(--chart-1))',
-    },
-    income: {
-      label: 'Rendimento',
-      color: 'hsl(var(--chart-2))',
-    },
-    tax: {
-      label: 'Impostos',
-      color: 'hsl(var(--chart-3))',
-    },
-  } satisfies ChartConfig
+  const {
+    annualFee,
+    annualRealFee,
+    discountedIncome,
+    futureValue,
+    futureValueGross,
+    income,
+    investedAmount,
+    periodInBusinessDays,
+    periodInDays,
+    presentValue,
+    realIncome,
+    tax,
+    investmentAmount,
+    taxAmount,
+  } = formatOutputValues<PeriodResponse | undefined>({
+    data: periodData,
+  })
 
-  const presentValue = formatAsBRL(periodData?.presentValue ?? 0)
-  const futureValueGross = formatAsBRL(periodData?.futureValueGross ?? 0)
-  const futureValue = formatAsBRL(periodData?.futureValue ?? 0)
-  const annualFee = (periodData ? periodData.annualIncomeFee * 100 : 0).toFixed(
-    2,
-  )
-  const annualRealFee = (
-    periodData ? periodData?.realAnnualIncomeFee * 100 : 0
-  ).toFixed(2)
-  const periodInDays = periodData ? periodData?.periodInDays : 0
-  const periodInBusinessDays = periodData ? periodData?.periodInBusinessDays : 0
-  const investedAmount = formatAsBRL(periodData?.investedAmount ?? 0)
-  const income = formatAsBRL(periodData?.income ?? 0)
-  const taxAmount = formatAsBRL(
-    chartData.find((data) => data.name === 'tax')?.amount ?? 0,
-  )
-  const tax = (periodData?.tax ?? 0) * 100
-  const discountedIncome = formatAsBRL(periodData?.discountedIncome ?? 0)
-  const realIncome = formatAsBRL(periodData?.realIncome ?? 0)
   const cupomPaymentAverage = formatAsBRL(periodData?.cupomPaymentAverage ?? 0)
   const period = periodData
     ? convertMonthlyPeriodToInterval(
@@ -156,17 +110,9 @@ export function PeriodForm() {
         periodData.periodInDays / 30,
       )
     : 0
-  const investmentAmount = formatCompact.format(
-    chartData.reduce((accumulatorAmount, currentAmount) => {
-      if (currentAmount.name !== 'tax') {
-        return (accumulatorAmount += currentAmount.amount)
-      }
-      return accumulatorAmount
-    }, 0),
-  )
 
   return (
-    <div className="flex w-[500px] flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <CalcFormProvider
         onSubmit={handleSubmit(handleCalcPeriod)}
         className="flex w-full basis-1/2 flex-col gap-4"

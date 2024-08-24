@@ -1,23 +1,19 @@
 'use client'
 
-import axios from 'axios'
 import { useState } from 'react'
 import { Label as L, Pie, PieChart } from 'recharts'
 import { z } from 'zod'
 
-import { GetFeeBody, GetFeeResponse } from '@/app/api/fee/route'
+import { getFee } from '@/api/getFee'
+import { GetFeeResponse } from '@/app/api/fee/route'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
 import {
   ConfigSchema,
   FieldSchema,
-  formatAsBRL,
-  formatCompact,
   formatOutputValues,
   generateFieldsUnits,
   getChartData,
-  getPeriod,
-  getPeriodUnit,
   handleCurrencyInputChange,
   handleDigitsInputChange,
   OutputResponse,
@@ -26,7 +22,6 @@ import {
 import { Box } from '../box'
 import { Button } from '../button'
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -71,19 +66,9 @@ export function FeeForm() {
   })
 
   const handleCalcFee = async (feeFormData: CalcFeeSchema) => {
-    const payload: GetFeeBody = {
-      present_value: feeFormData.present_value,
-      future_value: feeFormData.future_value,
-      contribution: feeFormData.contribution,
-      period: feeFormData.period,
-      period_interval: feeFormData.period_interval,
-    }
+    const { data: feeResponse } = await getFee<FeeResponse>(feeFormData)
 
-    if (feeFormData.tax) payload.tax = feeFormData.tax
-
-    const { data } = await axios.post('/api/fee', payload)
-
-    setFeeData(data)
+    setFeeData(feeResponse)
   }
 
   const { chartConfig, chartData } = getChartData({
@@ -111,34 +96,7 @@ export function FeeForm() {
     data: feeData,
   })
 
-  const presentValue = formatAsBRL(feeData?.presentValue ?? 0)
-  const futureValueGross = formatAsBRL(feeData?.futureValueGross ?? 0)
-  const futureValue = formatAsBRL(feeData?.futureValue ?? 0)
-  const annualFee = (feeData ? feeData.annualIncomeFee * 100 : 0).toFixed(2)
-  const annualRealFee = (
-    feeData ? feeData?.realAnnualIncomeFee * 100 : 0
-  ).toFixed(2)
-  const periodInDays = feeData ? feeData?.periodInDays : 0
-  const periodInBusinessDays = feeData ? feeData?.periodInBusinessDays : 0
-  const investedAmount = formatAsBRL(feeData?.investedAmount ?? 0)
-  const income = formatAsBRL(feeData?.income ?? 0)
-  const taxAmount = formatAsBRL(
-    chartData.find((data) => data.name === 'tax')?.amount ?? 0,
-  )
-  const tax = (feeData?.tax ?? 0) * 100
-  const discountedIncome = formatAsBRL(feeData?.discountedIncome ?? 0)
-  const realIncome = formatAsBRL(feeData?.realIncome ?? 0)
-
   const fee = ((feeData?.fee ?? 0) * 100).toFixed(2)
-
-  const investmentAmount = formatCompact.format(
-    chartData.reduce((accumulatorAmount, currentAmount) => {
-      if (currentAmount.name !== 'tax') {
-        return (accumulatorAmount += currentAmount.amount)
-      }
-      return accumulatorAmount
-    }, 0),
-  )
 
   return (
     <div className="flex flex-col gap-4">

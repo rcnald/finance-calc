@@ -178,38 +178,40 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
             )}
           />
         </div>
-
-        <div>
-          <Label
-            htmlFor="tax"
-            className="ml-1 text-sm font-medium leading-none"
-          >
-            Impostos
-          </Label>
-          <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
-            <Controller
-              control={control}
-              name="tax"
-              defaultValue={tax}
-              render={({ field }) => (
-                <Checkbox
-                  id="tax"
-                  defaultChecked
-                  checked={tax}
-                  onCheckedChange={(value) => {
-                    setTax(value as boolean)
-                    field.onChange(value)
-                  }}
-                />
-              )}
-            />
-
-            <Label htmlFor="tax" className="text-muted-foreground">
-              Imposto de renda
+        {calcMode !== 'present-value' ? (
+          <div>
+            <Label
+              htmlFor="tax"
+              className="ml-1 text-sm font-medium leading-none"
+            >
+              Impostos
             </Label>
+            <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
+              <Controller
+                control={control}
+                name="tax"
+                defaultValue={tax}
+                render={({ field }) => (
+                  <Checkbox
+                    id="tax"
+                    defaultChecked
+                    checked={tax}
+                    onCheckedChange={(value) => {
+                      setTax(value as boolean)
+                      field.onChange(value)
+                    }}
+                  />
+                )}
+              />
+
+              <Label htmlFor="tax" className="text-muted-foreground">
+                Imposto de renda
+              </Label>
+            </div>
           </div>
-        </div>
-        {calcMode === 'fee' ? null : (
+        ) : null}
+
+        {calcMode === 'fee' || calcMode === 'present-value' ? null : (
           <div>
             <Label
               htmlFor="cupom"

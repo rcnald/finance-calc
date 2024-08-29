@@ -66,10 +66,6 @@ export function PresentValueForm() {
   const { contributionPeriodUnit, feePeriodUnit, periodUnit } =
     generateFieldsUnits({ feeType, periodInterval })
 
-  // const feePeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()[0]
-  // const periodUnit = getPeriodUnit(periodInterval)
-  // const contributionPeriodUnit = getPeriod(periodInterval).toLocaleLowerCase()
-
   const handleCalcPresentValue = async (data: CalcPresentValueSchema) => {
     const { data: presentValueResponse } =
       await getPresentValue<PresentValueResponse>(data)

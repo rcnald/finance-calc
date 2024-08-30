@@ -211,7 +211,9 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
           </div>
         ) : null}
 
-        {calcMode === 'fee' || calcMode === 'present-value' ? null : (
+        {calcMode === 'fee' ||
+        calcMode === 'present-value' ||
+        calcMode === 'future-value' ? null : (
           <div>
             <Label
               htmlFor="cupom"

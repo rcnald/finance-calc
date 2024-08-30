@@ -36,6 +36,7 @@ export interface OutputResponse {
   tax: number
   discountedIncome: number
   realIncome: number
+  contribution?: number
 }
 
 export const ConfigSchema = z.object({
@@ -455,6 +456,7 @@ export function formatOutputValues<T extends OutputResponse | undefined>({
   const periodInBusinessDays = data ? data?.periodInBusinessDays : 0
   const investedAmount = formatAsBRL(data?.investedAmount ?? 0)
   const income = formatAsBRL(data?.income ?? 0)
+  const contributionPerInterval = formatAsBRL(data?.contribution ?? 0)
 
   const tax = (data?.tax ?? 0) * 100
   const discountedIncome = formatAsBRL(data?.discountedIncome ?? 0)
@@ -494,6 +496,7 @@ export function formatOutputValues<T extends OutputResponse | undefined>({
     realIncome,
     taxAmount,
     investmentAmount,
+    contributionPerInterval,
   }
 }
 

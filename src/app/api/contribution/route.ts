@@ -1,7 +1,6 @@
 import { BENCHMARKS, FeeBenchmark, FeeType, Interval } from '@/lib/data'
 import {
   calcGrossIncome,
-  convertContributionToMonthly,
   convertFeeToAnnual,
   convertFeeToMonthly,
   convertIntervalPeriodToMonths,
@@ -9,10 +8,10 @@ import {
   sumFees,
 } from '@/lib/utils'
 
-export interface GetFutureValueBody {
+export interface GetContributionBody {
   present_value: number
   fee: number
-  contribution?: number
+  future_value: number
   period_interval: Interval
   period: number
   fee_type: FeeType
@@ -20,7 +19,7 @@ export interface GetFutureValueBody {
   tax?: boolean
 }
 
-export interface GetFutureValueResponse {
+export interface GetContributionResponse {
   presentValue: number
   futureValue: number
   futureValueGross: number
@@ -43,14 +42,14 @@ export interface GetFutureValueResponse {
 export async function POST(request: Request) {
   const {
     present_value: presentValue,
+    future_value: futureValue,
     period_interval: periodInterval,
     period,
     fee_type: feeType = 'pre',
     tax: isTax,
-    contribution = 0,
     fee,
     benchmark,
-  }: GetFutureValueBody = await request.json()
+  }: GetContributionBody = await request.json()
 
   const periodInMonths = convertIntervalPeriodToMonths(periodInterval, period)
 
@@ -75,41 +74,41 @@ export async function POST(request: Request) {
       break
   }
 
-  const monthlyContribution = convertContributionToMonthly(
-    periodInterval,
-    contribution,
-  )
+  let contribution =
+    (futureValue - presentValue * (1 + monthlyFee) ** periodInMonths) /
+    (((1 + monthlyFee) ** periodInMonths - 1) / monthlyFee)
 
-  const futureValue =
-    presentValue * (1 + monthlyFee) ** periodInMonths +
-    (monthlyContribution * ((1 + monthlyFee) ** periodInMonths - 1)) /
-      monthlyFee
-
-  const investedAmount = presentValue + periodInMonths * monthlyContribution
+  const tax = isTax ? getTaxByPeriod(periodInMonths * 30) : 0
 
   const income = calcGrossIncome({
     futureValue,
     period: periodInMonths,
-    contribution: monthlyContribution,
+    contribution,
     presentValue,
-    tax: isTax ? getTaxByPeriod(periodInMonths * 30) : 0,
+    tax: isTax ? tax : 0,
   })
+
+  let investedAmount = presentValue + periodInMonths * contribution
 
   const futureValueGross = investedAmount + income
 
-  const tax = isTax ? getTaxByPeriod(periodInMonths * 30) : 0
-  const discountedIncome = income - income * tax
+  contribution =
+    (futureValueGross - presentValue * (1 + monthlyFee) ** periodInMonths) /
+    (((1 + monthlyFee) ** periodInMonths - 1) / monthlyFee)
 
+  investedAmount = presentValue + periodInMonths * contribution
+
+  investedAmount = presentValue + periodInMonths * contribution
+
+  const discountedIncome = income - income * tax
   const annualIncomeFee = convertFeeToAnnual('month', monthlyFee)
   const realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
   const realIncome = discountedIncome / (1 + BENCHMARKS.ipca)
 
-  const futureValueResponse: GetFutureValueResponse = {
+  const futureValueResponse: GetContributionResponse = {
     presentValue: Number(presentValue.toFixed(2)),
     futureValueGross: Number(futureValueGross.toFixed(2)),
-    futureValue: isTax
-      ? Number(futureValueGross.toFixed(2))
-      : Number(futureValue.toFixed(2)),
+    futureValue: Number(futureValue.toFixed(2)),
     contribution: Number(contribution.toFixed(2)),
     fee: Number(fee.toFixed(4)),
     annualIncomeFee: Number(annualIncomeFee.toFixed(4)),

@@ -44,8 +44,6 @@ export const ConfigSchema = z.object({
   benchmark: z.enum(FeeBenchmarkSchema).optional(),
   period_interval: z.enum(IntervalSchema),
   tax: z.boolean(),
-  cupom: z.boolean(),
-  cupom_interval: z.enum(IntervalSchema).optional(),
 })
 
 export type ConfigSchemaType = z.infer<typeof ConfigSchema>
@@ -308,55 +306,6 @@ export function convertIntervalToMonths(interval: Interval) {
   return intervalInMonths
 }
 
-export function calcCupomPayment(
-  presentValue: number,
-  monthlyFee: number,
-  cupomIntervalInMonths: number,
-): number {
-  let currentPeriod = 0
-  let cupomPayment = presentValue
-
-  while (currentPeriod < cupomIntervalInMonths) {
-    cupomPayment += cupomPayment * monthlyFee
-    currentPeriod++
-  }
-
-  return cupomPayment - presentValue
-}
-
-export function calcCupomPaymentAmount(
-  cupomPayment: number,
-  cupomIntervalInMonths: number,
-  income: number,
-  hasTax?: boolean,
-) {
-  let cupomAmountDiscounted = 0
-  let cupomAmount = 0
-  let count = 0
-  let periodInMonths = 0
-
-  while (cupomAmountDiscounted <= income) {
-    periodInMonths += cupomIntervalInMonths
-
-    const tax = hasTax ? getTaxByPeriod(periodInMonths * 30) : 0
-
-    cupomAmountDiscounted += cupomPayment - cupomPayment * tax
-
-    cupomAmount += cupomPayment
-
-    count += 1
-  }
-
-  const paymentAverage = cupomAmount / count
-
-  return {
-    cupomAmountDiscounted,
-    cupomAmount,
-    periodInMonths,
-    paymentAverage,
-  }
-}
-
 export function sumFees(fee1: number, fee2: number) {
   const result = (1 + fee1) * (1 + fee2) - 1
   return result
@@ -472,15 +421,6 @@ export function formatOutputValues<T extends OutputResponse | undefined>({
     chartData.find((chart) => chart.name === 'tax')?.amount ?? 0,
   )
 
-  const investmentAmount = formatCompact.format(
-    chartData.reduce((accumulatorAmount, currentAmount) => {
-      if (currentAmount.name !== 'tax') {
-        return (accumulatorAmount += currentAmount.amount)
-      }
-      return accumulatorAmount
-    }, 0),
-  )
-
   return {
     presentValue,
     futureValueGross,
@@ -495,7 +435,6 @@ export function formatOutputValues<T extends OutputResponse | undefined>({
     discountedIncome,
     realIncome,
     taxAmount,
-    investmentAmount,
     contributionPerInterval,
   }
 }
@@ -505,9 +444,9 @@ export function getChartData({
   discountedIncome,
   income,
 }: {
-  investedAmount: number
+  investedAmount?: number
   discountedIncome?: number
-  income: number
+  income?: number
 }) {
   const chartData = [
     {
@@ -522,7 +461,7 @@ export function getChartData({
     },
     {
       name: 'tax',
-      amount: discountedIncome ? income - discountedIncome : 0,
+      amount: discountedIncome ? (income ?? 0) - discountedIncome : 0,
       fill: 'var(--color-tax)',
     },
   ]

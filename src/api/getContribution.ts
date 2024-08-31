@@ -7,12 +7,10 @@ export type ContributionData = {
   fee_type: FeeType
   period_interval: Interval
   tax: boolean
-  cupom: boolean
   future_value: number
   period: number
   fee: number
   benchmark?: FeeBenchmark
-  cupom_interval?: Interval
   present_value?: number
 }
 
@@ -25,7 +23,6 @@ export interface GetContributionPayload {
   fee_type: FeeType
   benchmark?: FeeBenchmark
   tax?: boolean
-  cupom?: Interval
 }
 
 export async function getContribution<T extends OutputResponse>(
@@ -44,7 +41,6 @@ export async function getContribution<T extends OutputResponse>(
     payload.benchmark = contributionData.benchmark
   }
   if (contributionData.tax) payload.tax = contributionData.tax
-  if (contributionData.cupom) payload.cupom = contributionData.cupom_interval
 
   const payloadResponse = await axios.post<T>('/api/contribution', payload)
 

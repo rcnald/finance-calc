@@ -1,19 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Label as L, Pie, PieChart } from 'recharts'
 import { z } from 'zod'
 
 import { getPresentValue } from '@/api/getPresentValue'
 import { GetPresentValueResponse } from '@/app/api/present-value/route'
 import { useCalcForm } from '@/hooks/useCalcForm'
 import { useConfigParams } from '@/hooks/useConfigParams'
+import { useIncomeChart } from '@/hooks/useIncomeChart'
 import {
   ConfigSchema,
   FieldSchema,
   formatOutputValues,
   generateFieldsUnits,
-  getChartData,
   handleCurrencyInputChange,
   handleDigitsInputChange,
   OutputResponse,
@@ -21,23 +20,9 @@ import {
 
 import { Box } from '../box'
 import { Button } from '../button'
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '../chart'
 import { Input, InputUnit } from '../input'
 import { Label } from '../label'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../table'
+import { ReportTable } from '../report-table'
 import { FeeInfoCard } from './fee-info-card'
 
 const CalcPresentValueSchema = ConfigSchema.extend({
@@ -73,30 +58,17 @@ export function PresentValueForm() {
     setPresentValueData(presentValueResponse)
   }
 
-  const { chartConfig, chartData } = getChartData({
+  const { IncomeChart } = useIncomeChart({
     discountedIncome: presentValueData?.discountedIncome,
-    income: presentValueData?.income ?? 0,
-    investedAmount: presentValueData?.investedAmount ?? 0,
+    income: presentValueData?.income,
+    investedAmount: presentValueData?.investedAmount,
   })
 
-  const {
-    annualFee,
-    annualRealFee,
-    discountedIncome,
-    futureValue,
-    futureValueGross,
-    income,
-    investedAmount,
-    periodInBusinessDays,
-    periodInDays,
-    presentValue,
-    realIncome,
-    tax,
-    investmentAmount,
-    taxAmount,
-  } = formatOutputValues<PresentValueResponse | undefined>({
-    data: presentValueData,
-  })
+  const { presentValue } = formatOutputValues<PresentValueResponse | undefined>(
+    {
+      data: presentValueData,
+    },
+  )
 
   return (
     <div className="flex flex-col gap-4">
@@ -208,125 +180,11 @@ export function PresentValueForm() {
       </CalcFormProvider>
 
       <div className="flex basis-1/2 flex-col">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px] min-w-[400px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={chartData}
-              dataKey="amount"
-              nameKey="name"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              <L
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-2xl font-bold"
-                        >
-                          {investmentAmount.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Reais
-                        </tspan>
-                      </text>
-                    )
-                  }
-                }}
-              />
-            </Pie>
-            <ChartLegend
-              content={<ChartLegendContent nameKey="name" />}
-              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center [&>*]:whitespace-nowrap"
-            />
-          </PieChart>
-        </ChartContainer>
+        <IncomeChart />
 
-        <Table className="flex border">
-          <TableHeader className="border-r [&_th]:border-b [&_th]:font-bold [&_tr]:border-b-0">
-            <TableRow className="flex flex-col">
-              <TableHead className="flex h-auto w-[150px] items-center whitespace-nowrap p-4">
-                Valor presente
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Valor futuro bruto
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Valor futuro
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Taxa anual
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Taxa anual real
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Período em dias
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Período em dias uteis
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Valor investido
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Rendimento Bruto
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Valor imposto de renda
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Alíquota
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Rendimento liquido de IR
-              </TableHead>
-              <TableHead className="flex h-auto w-[150px] items-center p-4">
-                Rendimento real
-              </TableHead>
-              <TableHead className="flex h-[80px] w-[150px] items-center p-4">
-                Valor médio de cupom
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="w-full">
-            <TableRow className="flex flex-col [&_td]:border-b [&_td]:text-end">
-              <TableCell>{presentValue}</TableCell>
-              <TableCell className="h-[80px]">{futureValueGross}</TableCell>
-              <TableCell>{futureValue}</TableCell>
-              <TableCell>{annualFee}%</TableCell>
-              <TableCell>{annualRealFee}%</TableCell>
-              <TableCell>{periodInDays}</TableCell>
-              <TableCell className="h-[80px]">{periodInBusinessDays}</TableCell>
-              <TableCell>{investedAmount}</TableCell>
-              <TableCell className="h-[80px]">{income}</TableCell>
-              <TableCell className="h-[80px]">{taxAmount}</TableCell>
-              <TableCell>{tax}%</TableCell>
-              <TableCell className="h-[80px]">{discountedIncome}</TableCell>
-              <TableCell>{realIncome}</TableCell>
-              <TableCell className="h-[80px]">0</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <ReportTable<PresentValueResponse | undefined>
+          reportData={presentValueData}
+        />
       </div>
     </div>
   )

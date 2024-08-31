@@ -21,8 +21,7 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
   schema: z.ZodObject<z.ZodRawShape, z.UnknownKeysParam, z.ZodTypeAny>,
   defaultValues?: DefaultValues<T>,
 ) {
-  const { periodInterval, benchmark, feeType, tax, cupom, cupomInterval } =
-    useConfigParams()
+  const { periodInterval, benchmark, feeType, tax } = useConfigParams()
 
   const [open, setOpen] = useState(false)
 
@@ -30,8 +29,6 @@ export function useCalcForm<T extends ConfigSchemaType & CalcSchemaType>(
     resolver: zodResolver(schema),
     defaultValues: {
       benchmark,
-      cupom,
-      cupom_interval: cupomInterval,
       fee_type: feeType,
       period_interval: periodInterval,
       tax,

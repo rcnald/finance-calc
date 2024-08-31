@@ -57,12 +57,6 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
     'month',
     IntervalSchema,
   )
-  const [cupomInterval, setCupomInterval] = useQueryParams<Interval>(
-    'cupom-interval',
-    'month',
-    IntervalSchema,
-  )
-  const [cupom, setCupom] = useQueryParams<boolean>('cupom', false)
   const [tax, setTax] = useQueryParams<boolean>('tax', false)
 
   const CollapsibleTriggerIcon = open ? ChevronsDownUp : ChevronsUpDown
@@ -210,75 +204,6 @@ export function CalcConfig({ open, onOpenChange }: CalcConfigProps) {
             </div>
           </div>
         ) : null}
-
-        {calcMode === 'fee' ||
-        calcMode === 'present-value' ||
-        calcMode === 'future-value' ? null : (
-          <div>
-            <Label
-              htmlFor="cupom"
-              className="ml-1 text-sm font-medium leading-none"
-            >
-              Cupom
-            </Label>
-            <div className="flex h-8 w-fit items-center gap-2 rounded-md border border-input bg-background px-3 py-1">
-              <Controller
-                control={control}
-                name="cupom"
-                defaultValue={cupom}
-                render={({ field }) => (
-                  <Checkbox
-                    id="cupom"
-                    defaultChecked
-                    checked={cupom}
-                    onCheckedChange={(value) => {
-                      setCupom(value as boolean)
-                      field.onChange(value)
-                    }}
-                  />
-                )}
-              />
-              <Label htmlFor="cupom" className="text-muted-foreground">
-                Cupom de juros
-              </Label>
-
-              {cupom ? (
-                <>
-                  <Separator orientation="vertical" className="h-5" />
-                  <Label
-                    htmlFor="cupom-interval"
-                    className="text-muted-foreground"
-                  >
-                    Intervalo
-                  </Label>
-
-                  <Controller
-                    control={control}
-                    name="cupom_interval"
-                    defaultValue={cupomInterval}
-                    render={({ field }) => (
-                      <IntervalSelect
-                        id="cupom-interval"
-                        value={cupomInterval}
-                        onValueChange={(value) => {
-                          setCupomInterval(value as Interval)
-                          field.onChange(value)
-                        }}
-                      />
-                    )}
-                  />
-
-                  <Label
-                    htmlFor="cupom-interval"
-                    className="text-muted-foreground"
-                  >
-                    <ChevronDown size={16} />
-                  </Label>
-                </>
-              ) : null}
-            </div>
-          </div>
-        )}
       </CollapsibleContent>
     </Collapsible>
   )

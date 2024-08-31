@@ -7,12 +7,10 @@ export type PresentValueData = {
   fee_type: FeeType
   period_interval: Interval
   tax: boolean
-  cupom: boolean
   future_value: number
   period: number
   fee: number
   benchmark?: FeeBenchmark
-  cupom_interval?: Interval
   contribution?: number
 }
 
@@ -25,7 +23,6 @@ export interface GetPresentValuePayload {
   fee_type: FeeType
   benchmark?: FeeBenchmark
   tax?: boolean
-  cupom?: Interval
 }
 
 export async function getPresentValue<T extends OutputResponse>(
@@ -44,7 +41,6 @@ export async function getPresentValue<T extends OutputResponse>(
     payload.benchmark = periodData.benchmark
   }
   if (periodData.tax) payload.tax = periodData.tax
-  if (periodData.cupom) payload.cupom = periodData.cupom_interval
 
   const payloadResponse = await axios.post<T>('/api/present-value', payload)
 

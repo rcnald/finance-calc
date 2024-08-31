@@ -132,9 +132,9 @@ export async function POST(request: Request) {
 
   if (benchmark) presentValueResponse.benchmark = benchmark
 
-  // if (isTax)
-  //   presentValueResponse.discountedIncome = Number(discountedIncome.toFixed(2))
-  // if (isTax) presentValueResponse.tax = tax
+  if (isTax)
+    presentValueResponse.discountedIncome = Number(discountedIncome.toFixed(2))
+  if (isTax) presentValueResponse.tax = tax
 
   return Response.json(presentValueResponse)
 }

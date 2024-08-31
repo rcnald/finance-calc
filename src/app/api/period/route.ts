@@ -1,13 +1,10 @@
 import { BENCHMARKS, FeeBenchmark, FeeType, Interval } from '@/lib/data'
 import {
-  calcCupomPayment,
-  calcCupomPaymentAmount,
   calcGrossIncome,
   calcPeriodInMonths,
   convertContributionToMonthly,
   convertFeeToAnnual,
   convertFeeToMonthly,
-  convertIntervalToMonths,
   convertMonthlyPeriodToInterval,
   getTaxByPeriod,
   sumFees,
@@ -22,7 +19,6 @@ export interface GetPeriodBody {
   fee_type: FeeType
   benchmark?: FeeBenchmark
   tax?: boolean
-  cupom?: Interval
 }
 
 export interface GetPeriodResponse {
@@ -35,8 +31,6 @@ export interface GetPeriodResponse {
   periodInBusinessDays: number
   periodInterval: Interval
   investedAmount: number
-  cupomInterval?: Interval
-  cupomPaymentAverage?: number
   income: number
   discountedIncome?: number
   tax?: number
@@ -57,7 +51,6 @@ export async function POST(request: Request) {
     contribution = 0,
     fee,
     benchmark,
-    cupom,
   }: GetPeriodBody = await request.json()
 
   const monthlyBenchmarkFee = benchmark
@@ -94,65 +87,6 @@ export async function POST(request: Request) {
   let annualIncomeFee = 0
   let realAnnualIncomeFee = 0
   let realIncome = 0
-
-  let periodResponse: GetPeriodResponse
-
-  if (cupom) {
-    const cupomIntervalInMonths = convertIntervalToMonths(cupom)
-
-    const cupomPayment = calcCupomPayment(
-      presentValue,
-      monthlyFee,
-      cupomIntervalInMonths,
-    )
-
-    income = futureValue - presentValue
-
-    const {
-      cupomAmountDiscounted,
-      cupomAmount,
-      periodInMonths,
-      paymentAverage,
-    } = calcCupomPaymentAmount(
-      cupomPayment,
-      cupomIntervalInMonths,
-      income,
-      isTax,
-    )
-
-    investedAmount = presentValue
-    income = cupomAmount
-    discountedIncome = cupomAmountDiscounted
-    futureValueGross = cupomAmount + presentValue
-    annualIncomeFee = convertFeeToAnnual('month', monthlyFee)
-    realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
-    realIncome = cupomAmountDiscounted / (1 + BENCHMARKS.ipca)
-
-    periodResponse = {
-      presentValue,
-      futureValue: Number((cupomAmountDiscounted + presentValue).toFixed(2)),
-      futureValueGross: Number(futureValueGross.toFixed(2)),
-      fee: Number(fee.toFixed(4)),
-      annualIncomeFee: Number(annualIncomeFee.toFixed(4)),
-      realAnnualIncomeFee: Number(realAnnualIncomeFee.toFixed(4)),
-      feeType,
-      periodInDays: periodInMonths * 30,
-      periodInBusinessDays: periodInMonths * 21,
-      periodInterval,
-      cupomInterval: cupom,
-      cupomPaymentAverage: Number(paymentAverage.toFixed(2)),
-      investedAmount: Number(investedAmount.toFixed(2)),
-      income: Number(income.toFixed(2)),
-      realIncome: Number(realIncome.toFixed(2)),
-    }
-
-    if (benchmark) periodResponse.benchmark = benchmark
-
-    if (isTax)
-      periodResponse.discountedIncome = Number(discountedIncome.toFixed(2))
-
-    return Response.json(periodResponse)
-  }
 
   periodInMonths = calcPeriodInMonths({
     contribution: monthlyContribution,
@@ -200,7 +134,7 @@ export async function POST(request: Request) {
   realAnnualIncomeFee = (1 + annualIncomeFee) / (1 + BENCHMARKS.ipca) - 1
   realIncome = discountedIncome / (1 + BENCHMARKS.ipca)
 
-  periodResponse = {
+  const periodResponse: GetPeriodResponse = {
     presentValue,
     futureValue,
     futureValueGross: Number(futureValueGross.toFixed(2)),

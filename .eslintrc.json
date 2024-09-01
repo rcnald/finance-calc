@@ -5,7 +5,19 @@
   ],
   "plugins": ["simple-import-sort"],
   "rules": {
-    "simple-import-sort/imports": "error"
+    "simple-import-sort/imports": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ]
   },
   "parserOptions": {
     "sourceType": "module",
